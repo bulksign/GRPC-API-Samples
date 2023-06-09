@@ -1,0 +1,73 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Scenarios\AddAttachment.cs" />
+    <Compile Remove="Scenarios\AddNewSignatureToDocument.cs" />
+    <Compile Remove="Scenarios\AddOrganizationAutomaticSigningProfile.cs" />
+    <Compile Remove="Scenarios\AddRecipientsAndDocumentstoExistingDraft.cs" />
+    <Compile Remove="Scenarios\AddTextAnnotationsToDocument.cs" />
+    <Compile Remove="Scenarios\AddUserContact.cs" />
+    <Compile Remove="Scenarios\AllowRecipientDelegation.cs" />
+    <Compile Remove="Scenarios\AnalyzeFileAndDynamicallyAddSignatureFields.cs" />
+    <Compile Remove="Scenarios\AuthenticationProviders.cs" />
+    <Compile Remove="Scenarios\CancelEnvelope.cs" />
+    <Compile Remove="Scenarios\CustomDocumentAccess.cs" />
+    <Compile Remove="Scenarios\DisableEmailNotifications.cs" />
+    <Compile Remove="Scenarios\DocumentTimestamping.cs" />
+    <Compile Remove="Scenarios\DownloadEnvelopeCompletedDocuments.cs" />
+    <Compile Remove="Scenarios\GetCompletedFormFields.cs" />
+    <Compile Remove="Scenarios\GetDrafts.cs" />
+    <Compile Remove="Scenarios\GetEnvelopeDetails.cs" />
+    <Compile Remove="Scenarios\MultipleSignersConcurrentFlow.cs" />
+    <Compile Remove="Scenarios\MultipleSignersInBulkFlow.cs" />
+    <Compile Remove="Scenarios\MultipleSignersInSerialFlow.cs" />
+    <Compile Remove="Scenarios\OnboardNewOrganization.cs" />
+    <Compile Remove="Scenarios\OpenIdConnectAuthenticationForSigner.cs" />
+    <Compile Remove="Scenarios\OrganizationAutomaticSigningProfile.cs" />
+    <Compile Remove="Scenarios\OrganizationUsers.cs" />
+    <Compile Remove="Scenarios\OverwriteFormFieldValues.cs" />
+    <Compile Remove="Scenarios\PrepareSendEnvelope.cs" />
+    <Compile Remove="Scenarios\PrepareSendEnvelopeWithTags.cs" />
+    <Compile Remove="Scenarios\PreventFinishedDocumentToAllSigners.cs" />
+    <Compile Remove="Scenarios\ReplaceEnvelopeRecipient.cs" />
+    <Compile Remove="Scenarios\RestartEnvelope.cs" />
+    <Compile Remove="Scenarios\SearchEnvelopes.cs" />
+    <Compile Remove="Scenarios\SearchTeamMembersDrafts.cs" />
+    <Compile Remove="Scenarios\SearchTeamMembersEnvelopes.cs" />
+    <Compile Remove="Scenarios\SearchTeamMembersTemplates.cs" />
+    <Compile Remove="Scenarios\SendEnvelopeDocumentNetworkShare.cs" />
+    <Compile Remove="Scenarios\SendEnvelopeFromTemplateOverwriteRecipients.cs" />
+    <Compile Remove="Scenarios\SendEnvelopeRemoteSignatureProvider.cs" />
+    <Compile Remove="Scenarios\SingleDocumentApproverAndSigner.cs" />
+    <Compile Remove="Scenarios\StampSignatures.cs" />
+    <Compile Remove="Scenarios\TextFieldValidation.cs" />
+    <Compile Remove="Scenarios\UnlockConcurrentRecipient.cs" />
+    <Compile Remove="Scenarios\UpdateOrganizationSettings.cs" />
+    <Compile Remove="Scenarios\UpdateUserSettings.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="api.proto" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.23.2" />
+    <PackageReference Include="Grpc.Net.Client" Version="2.53.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.54.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="api.proto" GrpcServices="Client" />
+  </ItemGroup>
+
+</Project>
