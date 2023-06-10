@@ -5,7 +5,7 @@ namespace GrpcApiSamples;
 
 public class ChannelManager
 {
-	private static GrpcChannel channel = null;
+	private static GrpcChannel channel;
 
 	//update this to point to the Bulksign GRPC API endpoint
 	private const string ENDPOINT_URL = "http://localhost:5000";

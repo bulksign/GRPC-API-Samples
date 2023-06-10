@@ -1,8 +1,8 @@
 ﻿using Bulksign.Api;
 using GrpcApiSamples;
 
-namespace Bulksign.ApiSamples
-{
+namespace Bulksign.ApiSamples;
+
 	public class GetEnvelopesByStatus
 	{
 		public void RunSample()
@@ -34,4 +34,3 @@ namespace Bulksign.ApiSamples
 		}
 
 	}
-}

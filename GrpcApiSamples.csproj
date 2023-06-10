@@ -8,11 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Scenarios\AddAttachment.cs" />
-    <Compile Remove="Scenarios\AddNewSignatureToDocument.cs" />
-    <Compile Remove="Scenarios\AddOrganizationAutomaticSigningProfile.cs" />
-    <Compile Remove="Scenarios\AddRecipientsAndDocumentstoExistingDraft.cs" />
-    <Compile Remove="Scenarios\AddTextAnnotationsToDocument.cs" />
     <Compile Remove="Scenarios\AddUserContact.cs" />
     <Compile Remove="Scenarios\AllowRecipientDelegation.cs" />
     <Compile Remove="Scenarios\AnalyzeFileAndDynamicallyAddSignatureFields.cs" />

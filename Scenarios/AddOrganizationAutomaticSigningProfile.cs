@@ -1,11 +1,10 @@
-﻿using System;
-using Bulksign.Api;
+﻿using Bulksign.Api;
+using GrpcApiSamples;
 
-namespace Bulksign.ApiSamples
+namespace Bulksign.ApiSamples;
+
+public class AddOrganizationAutomaticSigningProfile
 {
-	public class AddOrganizationAutomaticSigningProfile
-	{
-
 		public void RunSample()
 		{
 			AuthenticationApiModel token = new ApiKeys().GetAuthentication();
@@ -16,9 +15,7 @@ namespace Bulksign.ApiSamples
 				return;
 			}
 
-			BulksignApiClient api = new BulksignApiClient();
-
-			var newProfile = new AutomaticSigningProfileApiModel();
+			AutomaticSigningProfileApiModelInput newProfile = new AutomaticSigningProfileApiModelInput();
 			newProfile.Name = "My Profile";
 
 			//we'll use the default organization certificate 
@@ -31,7 +28,7 @@ namespace Bulksign.ApiSamples
 			//you can call GetSignatureImprints here, see sample from SigningImprints.cs
 			newProfile.SignatureImprintName = "";
 
-			BulksignResult<string> result = api.AddOrganizationAutomaticSigningProfile(token,  newProfile);
+			EmptyResult result = ChannelManager.GetClient().AddOrganizationAutomaticSigningProfile(newProfile);
 
 			if (result.IsSuccessful)
 			{
@@ -42,5 +39,4 @@ namespace Bulksign.ApiSamples
 				Console.WriteLine("ERROR : " + result.ErrorCode + " " + result.ErrorMessage);
 			}
 		}
-	}
 }

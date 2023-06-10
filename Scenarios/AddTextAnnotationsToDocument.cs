@@ -1,16 +1,12 @@
-﻿using System;
-using System.IO;
-using Bulksign.Api;
+﻿using Bulksign.Api;
+using GrpcApiSamples;
 
-namespace Bulksign.ApiSamples
-{
+namespace Bulksign.ApiSamples;
+
 	public class AddTextAnnotationsToDocument
 	{
 		public void RunSample()
 		{
-			try
-			{
-
 				AuthenticationApiModel token = new ApiKeys().GetAuthentication();
 
 				if (string.IsNullOrEmpty(token.Key))
@@ -19,10 +15,7 @@ namespace Bulksign.ApiSamples
 					return;
 				}
 
-
-				BulksignApiClient api = new BulksignApiClient();
-
-				EnvelopeApiModel envelope = new EnvelopeApiModel();
+				EnvelopeApiModelInput envelope = new EnvelopeApiModelInput();
 				envelope.EnvelopeType                    = EnvelopeTypeApi.Serial;
 				envelope.DaysUntilExpire                 = 10;
 				envelope.DisableSignerEmailNotifications = false;
@@ -32,8 +25,7 @@ namespace Bulksign.ApiSamples
 					RecurrentEachDays = 2
 				};
 
-				envelope.Recipients = new[]
-				{
+				envelope.Recipients.Add( 
 						  new RecipientApiModel()
 						  {
 								Name = "Bulksign Test",
@@ -41,7 +33,7 @@ namespace Bulksign.ApiSamples
 								Index = 1,
 								RecipientType = RecipientTypeApi.Signer
 						  }
-				};
+				);
 
 
 				DocumentApiModel document = new DocumentApiModel();
@@ -49,9 +41,7 @@ namespace Bulksign.ApiSamples
 				document.FileName = "singlepage.pdf";
 
 
-				document.NewSignatures = new[]
-				{
-						  new NewSignatureApiModel()
+				document.NewSignatures.Add(new NewSignatureApiModel()
 						  {
 								Height = 100,
 								Width = 250,
@@ -59,13 +49,11 @@ namespace Bulksign.ApiSamples
 								Left = 100,
 								Top = 500
 						  }
-				};
+				);
 
 
 				//add new text annotations
-				document.NewAnnotations = new[]
-				{
-					//width,height, left and top values are in pixels
+				document.NewAnnotations.AddRange( new[]{//width,height, left and top values are in pixels
 					new NewAnnotationApiModel
 					{
 						PageIndex = 1,
@@ -94,40 +82,41 @@ namespace Bulksign.ApiSamples
 						Type = AnnotationTypeApi.SenderOrganizationName
 					}
 
-			};
+			});
 
 
-				envelope.Documents = new[]
-				{
+				envelope.Documents.Add(
+				
 					new DocumentApiModel()
 					{
 						FileContentByteArray = new FileContentByteArray()
 						{
-							ContentBytes = File.ReadAllBytes(Environment.CurrentDirectory + @"\Files\forms.pdf")
+							ContentBytes = ConversionUtilities.ConvertoToByteString(File.ReadAllBytes(Environment.CurrentDirectory + @"\Files\forms.pdf"))
 						},
 						FileName = "forms.pdf"
 					}
-			};
+			);
+				
+			try
+			{
 
-
-				BulksignResult<SendEnvelopeResultApiModel> result = api.SendEnvelope(token, envelope);
+				SendEnvelopeResult result = ChannelManager.GetClient().SendEnvelope(envelope);
 
 				if (result.IsSuccessful)
 				{
-					Console.WriteLine("Access code for recipient " + result.Response.RecipientAccess[0].RecipientEmail + " is " + result.Response.RecipientAccess[0].AccessCode);
-					Console.WriteLine("Envelope id is : " + result.Response.EnvelopeId);
+					Console.WriteLine("Access code for recipient " + result.Result.RecipientAccess[0].RecipientEmail + " is " + result.Result.RecipientAccess[0].AccessCode);
+					Console.WriteLine("Envelope id is : " + result.Result.EnvelopeId);
 				}
 				else
 				{
 					Console.WriteLine("ERROR : " + result.ErrorCode + " " + result.ErrorMessage);
 				}
 			}
-			catch (BulksignException bex)
+			catch (Exception bex)
 			{
-				Console.WriteLine(bex.Message + Environment.NewLine + bex.Response);
+				Console.WriteLine(bex.Message + Environment.NewLine);
 			}
 		}
 
 
 	}
-}
