@@ -1,11 +1,12 @@
 using System;
 using System.IO;
 using Bulksign.Api;
+using GrpcApiSamples;
 
-namespace Bulksign.ApiSamples
+namespace Bulksign.ApiSamples;
+
+public class AllowRecipientDelegation
 {
-	public class AllowRecipientDelegation
-	{
 
 		public void RunSample()
 		{
@@ -17,10 +18,8 @@ namespace Bulksign.ApiSamples
 				return;
 			}
 
-
-			BulksignApiClient api = new BulksignApiClient();
-
-			EnvelopeApiModel envelope = new EnvelopeApiModel();
+			EnvelopeApiModelInput envelope = new EnvelopeApiModelInput();
+			envelope.Authentication = token;
 			envelope.EnvelopeType    = EnvelopeTypeApi.Serial;
 			envelope.DaysUntilExpire = 10;
 			envelope.EmailMessage = "Please sign this document";
@@ -30,39 +29,45 @@ namespace Bulksign.ApiSamples
 			//setting this to true will allow the recipient to delegate signing to another person
 			envelope.AllowRecipientDelegation = true;
 
-			envelope.Recipients = new[]
-			{
-				new RecipientApiModel(){
+			envelope.Recipients.Add(new RecipientApiModel()
+				{
 					Name = "Bulksign Test",
 					Email = "contact@bulksign.com",
 					Index = 1,
 					RecipientType = RecipientTypeApi.Signer
 				}
-			};
+			);
 
-			envelope.Documents = new[]
+			envelope.Documents.Add(new DocumentApiModel()
 			{
-				new DocumentApiModel(){
 				Index = 1,
 				FileName = "test.pdf",
 				FileContentByteArray = new FileContentByteArray()
 					{
-						ContentBytes = File.ReadAllBytes(Environment.CurrentDirectory + @"\Files\bulksign_test_Sample.pdf")
+						ContentBytes = ConversionUtilities.ConvertToByteString( File.ReadAllBytes(Environment.CurrentDirectory + @"\Files\bulksign_test_Sample.pdf"))
 					}
+				
+			});
+
+			try
+			{
+				SendEnvelopeResult result = ChannelManager.GetClient().SendEnvelope(envelope);
+
+				if (result.IsSuccessful)
+				{
+					Console.WriteLine("Access code for recipient " + result.Result.RecipientAccess[0].RecipientEmail + " is " + result.Result.RecipientAccess[0].AccessCode);
+					Console.WriteLine("Envelope id is : " + result.Result.EnvelopeId);
 				}
-			};
-
-			BulksignResult<SendEnvelopeResultApiModel> result = api.SendEnvelope(token, envelope);
-
-			if (result.IsSuccessful)
-			{
-				Console.WriteLine("Access code for recipient " + result.Response.RecipientAccess[0].RecipientEmail + " is " + result.Response.RecipientAccess[0].AccessCode);
-				Console.WriteLine("Envelope id is : " + result.Response.EnvelopeId);
+				else
+				{
+					Console.WriteLine($"Request failed : ErrorCode '{result.ErrorCode}' , Message {result.ErrorMessage}");
+				}
 			}
-			else
+			catch (Exception ex)
 			{
-				Console.WriteLine($"Request failed : ErrorCode '{result.ErrorCode}' , Message {result.ErrorMessage}");
+				//handle failed request here
+				Console.WriteLine(ex.Message);
 			}
 		}
-	}
 }
+

@@ -1,6 +1,5 @@
-﻿using System;
-using System.IO;
-using Bulksign.Api;
+﻿using Bulksign.Api;
+using GrpcApiSamples;
 
 namespace Bulksign.ApiSamples
 {
@@ -16,9 +15,8 @@ namespace Bulksign.ApiSamples
 				return;
 			}
 
-			BulksignApiClient api = new BulksignApiClient();
-
-			EnvelopeApiModel envelope = new EnvelopeApiModel();
+			EnvelopeApiModelInput envelope = new EnvelopeApiModelInput();
+			envelope.Authentication = token;
 			envelope.EnvelopeType                    = EnvelopeTypeApi.Serial;
 			envelope.DaysUntilExpire                 = 10;
 			envelope.DisableSignerEmailNotifications = false;
@@ -26,7 +24,7 @@ namespace Bulksign.ApiSamples
 			envelope.EmailSubject                    = "Please Bulksign this document";
 			envelope.Name                            = "Test envelope";
 
-			envelope.Recipients = new []
+			envelope.Recipients.AddRange( new []
 			{
 				//the Index property will determine the order in which the recipients will sign the document(s). 
 
@@ -44,36 +42,40 @@ namespace Bulksign.ApiSamples
 					Index = 2,
 					RecipientType = RecipientTypeApi.Signer,
 				} 
-			};
+			});
 
-			envelope.Documents = new[]
-			{
-				new DocumentApiModel()
+			envelope.Documents.Add(new DocumentApiModel()
 				{
 					Index = 1,
 					FileName = "test.pdf",
 					FileContentByteArray = new FileContentByteArray()
 					{
-						ContentBytes	= File.ReadAllBytes(Environment.CurrentDirectory + @"\Files\bulksign_test_Sample.pdf")
+						ContentBytes = ConversionUtilities.ConvertToByteString( File.ReadAllBytes(Environment.CurrentDirectory + @"\Files\bulksign_test_Sample.pdf"))
 					}
 				} 
-			};
+			);
 
-
-			BulksignResult<SendEnvelopeResultApiModel> result = api.SendEnvelope(token, envelope);
-
-			Console.WriteLine("Api request is successful: " + result.IsSuccessful);
-
-			if (result.IsSuccessful)
+			try
 			{
-				Console.WriteLine("Access code for recipient " + result.Response.RecipientAccess[0].RecipientEmail + " is " + result.Response.RecipientAccess[0].AccessCode);
-				Console.WriteLine("Envelope id is : " + result.Response.EnvelopeId);
-			}
-			else
-			{
-				Console.WriteLine($"Request failed : ErrorCode '{result.ErrorCode}' , Message {result.ErrorMessage}");
-			}
+				SendEnvelopeResult result = ChannelManager.GetClient().SendEnvelope(envelope);
 
+				Console.WriteLine("Api request is successful: " + result.IsSuccessful);
+
+				if (result.IsSuccessful)
+				{
+					Console.WriteLine("Access code for recipient " + result.Result.RecipientAccess[0].RecipientEmail + " is " + result.Result.RecipientAccess[0].AccessCode);
+					Console.WriteLine("Envelope id is : " + result.Result.EnvelopeId);
+				}
+				else
+				{
+					Console.WriteLine($"Request failed : ErrorCode '{result.ErrorCode}' , Message {result.ErrorMessage}");
+				}
+			}
+			catch (Exception ex)
+			{
+				//handle failed request
+				Console.WriteLine(ex.Message);
+			}
 		}
 	}
 }

@@ -1,10 +1,10 @@
-﻿using System;
-using Bulksign.Api;
+﻿using Bulksign.Api;
+using GrpcApiSamples;
 
-namespace Bulksign.ApiSamples
+namespace Bulksign.ApiSamples;
+
+public class AddUserContact
 {
-	public class AddUserContact
-	{
 		public void RunSample()
 		{
 			AuthenticationApiModel token = new ApiKeys().GetAuthentication();
@@ -15,26 +15,32 @@ namespace Bulksign.ApiSamples
 				return;
 			}
 
-			BulksignApiClient api = new BulksignApiClient();
-
-			NewContactApiModel contact = new NewContactApiModel
+			NewContactApiModelInput contact = new NewContactApiModelInput
 			{
+				Authentication = token,
 				Address = "address",
 				Company = "My Company",
 				Email   = "email@domain.net",
 				Name    = "Contact Name"
 			};
 
-			BulksignResult<string> result = api.AddContact(token,contact);
+			try
+			{
+				EmptyResult result = ChannelManager.GetClient().AddContact(contact);
 
-			if (result.IsSuccessful)
-			{
-				Console.WriteLine("Contact was successfully added");
+				if (result.IsSuccessful)
+				{
+					Console.WriteLine("Contact was successfully added");
+				}
+				else
+				{
+					Console.WriteLine("ERROR : " + result.ErrorCode + " " + result.ErrorMessage);
+				}
 			}
-			else
+			catch (Exception ex)
 			{
-				Console.WriteLine("ERROR : " + result.ErrorCode + " " + result.ErrorMessage);
+				//handle the failed request
+				Console.WriteLine(ex.Message);
 			}
 		}
-	}
 }

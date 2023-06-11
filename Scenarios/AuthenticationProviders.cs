@@ -1,32 +1,39 @@
 ﻿using System;
 using Bulksign.Api;
+using GrpcApiSamples;
 
-namespace Bulksign.ApiSamples
+namespace Bulksign.ApiSamples;
+
+public class AuthenticationProviders
 {
-	public class AuthenticationProviders
+	public void RunSample()
 	{
-		public void RunSample()
+		AuthenticationApiModel token = new ApiKeys().GetAuthentication();
+
+		if (string.IsNullOrEmpty(token.Key))
 		{
-			AuthenticationApiModel token = new ApiKeys().GetAuthentication();
+			Console.WriteLine("Please edit APiKeys.cs and put your own token/email");
+			return;
+		}
 
-			if (string.IsNullOrEmpty(token.Key))
-			{
-				Console.WriteLine("Please edit APiKeys.cs and put your own token/email");
-				return;
-			}
-
-			BulksignApiClient api = new BulksignApiClient();
-
-			BulksignResult<AuthenticationProviderResultApiModel[]> result = api.GetAuthenticationProviders(token);
+		try
+		{
+			GetAuthenticationProvidersResult result = ChannelManager.GetClient().GetAuthenticationProviders(token);
 
 			if (result.IsSuccessful)
 			{
-				Console.WriteLine($"Found {result.Response.Length} authentication providers");
+				Console.WriteLine($"Found {result.Result.Count} authentication providers");
 			}
 			else
 			{
 				Console.WriteLine("ERROR : " + result.ErrorCode + " " + result.ErrorMessage);
 			}
 		}
+		catch (Exception ex)
+		{
+			//handle failed request here
+			Console.WriteLine(ex);
+		}
+
 	}
 }

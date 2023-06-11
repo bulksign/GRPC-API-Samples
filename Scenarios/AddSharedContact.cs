@@ -24,11 +24,23 @@ public class AddSharedContact
             Authentication = token
         };
 
-        EmptyResult? result = ChannelManager.GetClient().AddSharedContact(contact);
+        try
+        {
+            EmptyResult result = ChannelManager.GetClient().AddSharedContact(contact);
 
-        if (result.IsSuccessful)
-            Console.WriteLine("Contact was successfully added");
-        else
-            Console.WriteLine("ERROR : " + result.ErrorCode + " " + result.ErrorMessage);
+            if (result.IsSuccessful)
+            {
+                Console.WriteLine("Contact was successfully added");
+            }
+            else
+            {
+                Console.WriteLine("ERROR : " + result.ErrorCode + " " + result.ErrorMessage);
+            }
+        }
+        catch (Exception ex)
+        {
+            //handle failed request
+            Console.WriteLine(ex.Message);
+        }
     }
 }

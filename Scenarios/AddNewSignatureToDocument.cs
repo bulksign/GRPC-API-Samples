@@ -44,7 +44,7 @@ public class AddNewSignatureToDocument
 					FileName = "singlepage.pdf",
 					FileContentByteArray = new FileContentByteArray()
 					{
-						ContentBytes = ConversionUtilities.ConvertoToByteString(File.ReadAllBytes(Environment.CurrentDirectory + @"\Files\singlepage.pdf"))
+						ContentBytes = ConversionUtilities.ConvertToByteString(File.ReadAllBytes(Environment.CurrentDirectory + @"\Files\singlepage.pdf"))
 					},
 					
 					NewSignatures = 
@@ -69,17 +69,24 @@ public class AddNewSignatureToDocument
 				}, 
 			});
 
-
-			SendEnvelopeResult result = ChannelManager.GetClient().SendEnvelope(envelope);
-
-			if (result.IsSuccessful)
+			try
 			{
-				Console.WriteLine("Access code for recipient " + result.Result.RecipientAccess[0].RecipientEmail + " is " + result.Result.RecipientAccess[0].AccessCode);
-				Console.WriteLine("EnvelopeId is : " + result.Result.EnvelopeId);
+				SendEnvelopeResult result = ChannelManager.GetClient().SendEnvelope(envelope);
+
+				if (result.IsSuccessful)
+				{
+					Console.WriteLine("Access code for recipient " + result.Result.RecipientAccess[0].RecipientEmail + " is " + result.Result.RecipientAccess[0].AccessCode);
+					Console.WriteLine("EnvelopeId is : " + result.Result.EnvelopeId);
+				}
+				else
+				{
+					Console.WriteLine("ERROR : " + result.ErrorCode + " " + result.ErrorMessage);
+				}
 			}
-			else
+			catch(Exception ex)
 			{
-				Console.WriteLine("ERROR : " + result.ErrorCode + " " + result.ErrorMessage);
+				//handle failed request	
+				Console.WriteLine(ex.Message);
 			}
 
 		}

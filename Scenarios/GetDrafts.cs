@@ -1,34 +1,36 @@
-﻿using System;
-using Bulksign.Api;
+﻿using Bulksign.Api;
+using GrpcApiSamples;
 
-namespace Bulksign.ApiSamples
+namespace Bulksign.ApiSamples;
+
+public class GetDrafts
 {
-	public class GetDrafts
+	public void RunSample()
 	{
-		public void RunSample()
+		AuthenticationApiModel token = new ApiKeys().GetAuthentication();
+
+		if (string.IsNullOrEmpty(token.Key))
 		{
-			AuthenticationApiModel token = new ApiKeys().GetAuthentication();
+			Console.WriteLine("Please edit APiKeys.cs and put your own token/email");
+			return;
+		}
 
-			if (string.IsNullOrEmpty(token.Key))
-			{
-				Console.WriteLine("Please edit APiKeys.cs and put your own token/email");
-				return;
-			}
-
-			BulksignApiClient api = new BulksignApiClient();
-
-			BulksignResult<DraftItemResultApiModel[]> result = api.GetDrafts(token);
-
-			//check if the result was successful
+		try
+		{
+			GetDraftsResult result = ChannelManager.GetClient().GetDrafts(token);
 
 			if (result.IsSuccessful == false)
 			{
-				Console.WriteLine($"Request failed : RequestId {result.RequestId}, ErrorCode '{result.ErrorCode}' , Message {result.ErrorMessage}");
+				Console.WriteLine(result.Result.Count + " drafts found");
 			}
 			else
 			{
-				Console.WriteLine(result.Response.Length + " drafts found");
+				Console.WriteLine($"Request failed : RequestId {result.RequestId}, ErrorCode '{result.ErrorCode}' , Message {result.ErrorMessage}");
 			}
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine(ex.Message);
 		}
 	}
 }

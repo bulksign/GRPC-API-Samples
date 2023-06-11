@@ -1,29 +1,38 @@
-﻿using System;
-using Bulksign.Api;
+﻿using Bulksign.Api;
+using GrpcApiSamples;
 
-namespace Bulksign.ApiSamples
+namespace Bulksign.ApiSamples;
+
+public class OrganizationAutomaticSigningProfile
 {
-	public class OrganizationAutomaticSigningProfile
+
+	public void RunSample()
 	{
+		AuthenticationApiModel token = new ApiKeys().GetAuthentication();
 
-		public void RunSample()
+		if (string.IsNullOrEmpty(token.Key))
 		{
-			AuthenticationApiModel token = new ApiKeys().GetAuthentication();
+			Console.WriteLine("Please edit APiKeys.cs and put your own token/email");
+			return;
+		}
 
-			if (string.IsNullOrEmpty(token.Key))
-			{
-				Console.WriteLine("Please edit APiKeys.cs and put your own token/email");
-				return;
-			}
-
-			BulksignApiClient api = new BulksignApiClient();
-
-			BulksignResult<AutomaticSigningProfileResultApiModel[]> result = api.GetOrganizationAutomaticSigningProfiles(token);
+		try
+		{
+			GetOrganizationAutomaticSigningProfilesResult result = ChannelManager.GetClient().GetOrganizationAutomaticSigningProfiles(token);
 
 			if (result.IsSuccessful)
-				Console.WriteLine($"Found {result.Response.Length} organization automatic signing profiles ");
+			{
+				Console.WriteLine($"Found {result.Result.Count} organization automatic signing profiles ");
+			}
 			else
+			{
 				Console.WriteLine("ERROR : " + result.ErrorCode + " " + result.ErrorMessage);
+			}
+		}
+		catch (Exception ex)
+		{
+			//handle failed request
+			Console.WriteLine(ex.Message);
 		}
 	}
 }

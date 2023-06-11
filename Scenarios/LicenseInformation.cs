@@ -1,20 +1,22 @@
 ﻿using Bulksign.Api;
 using GrpcApiSamples;
 
-namespace Bulksign.ApiSamples
+namespace Bulksign.ApiSamples;
+
+public class LicenseInformation
 {
-	public class LicenseInformation
+	public void RunSample()
 	{
-		public void RunSample()
+		AuthenticationApiModel token = new ApiKeys().GetAuthentication();
+
+		if (string.IsNullOrEmpty(token.Key))
 		{
-			AuthenticationApiModel token = new ApiKeys().GetAuthentication();
+			Console.WriteLine("Please edit APiKeys.cs and put your own token/email");
+			return;
+		}
 
-			if (string.IsNullOrEmpty(token.Key))
-			{
-				Console.WriteLine("Please edit APiKeys.cs and put your own token/email");
-				return;
-			}
-
+		try
+		{
 			GetLicenseResult result = ChannelManager.GetClient().GetLicense(token);
 
 			if (result.IsSuccessful)
@@ -25,6 +27,11 @@ namespace Bulksign.ApiSamples
 			{
 				Console.WriteLine("ERROR : " + result.ErrorCode + " " + result.ErrorMessage);
 			}
+		}
+		catch (Exception ex)
+		{
+			//handle failed requests
+			Console.WriteLine(ex.Message);
 		}
 	}
 }

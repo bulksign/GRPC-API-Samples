@@ -1,113 +1,111 @@
-using System;
-using System.IO;
 using Bulksign.Api;
+using GrpcApiSamples;
 
-namespace Bulksign.ApiSamples
+namespace Bulksign.ApiSamples;
+
+public class CustomDocumentAccess
 {
-	public class CustomDocumentAccess
+	public void RunSample()
 	{
-		public void RunSample()
+		AuthenticationApiModel token = new ApiKeys().GetAuthentication();
+
+		if (string.IsNullOrEmpty(token.Key))
 		{
+			Console.WriteLine("Please edit APiKeys.cs and put your own token/email");
+			return;
+		}
 
-			AuthenticationApiModel token = new ApiKeys().GetAuthentication();
+		EnvelopeApiModelInput envelope = new EnvelopeApiModelInput();
+		envelope.Authentication = token;
+		envelope.EnvelopeType = EnvelopeTypeApi.Serial;
+		envelope.DaysUntilExpire = 10;
+		envelope.EmailMessage = "Please sign this document";
+		envelope.EmailSubject = "Please Bulksign this document";
+		envelope.Name = "Test envelope";
 
-			if (string.IsNullOrEmpty(token.Key))
+		envelope.Recipients.AddRange(new[]
+		{
+			new RecipientApiModel()
 			{
-				Console.WriteLine("Please edit APiKeys.cs and put your own token/email");
-				return;
+				Name = "Bulksign Test",
+				Email = "contact@bulksign.com",
+				Index = 1,
+				RecipientType = RecipientTypeApi.Signer
+			},
+
+			new RecipientApiModel()
+			{
+				Name = "Second Recipient",
+				Email = "second@bulksign.com",
+				Index = 1,
+				RecipientType = RecipientTypeApi.Signer
 			}
+		});
 
-
-			BulksignApiClient api = new BulksignApiClient();
-
-			EnvelopeApiModel envelope = new EnvelopeApiModel();
-			envelope.EnvelopeType    = EnvelopeTypeApi.Serial;
-			envelope.DaysUntilExpire = 10;
-			envelope.EmailMessage    = "Please sign this document";
-			envelope.EmailSubject    = "Please Bulksign this document";
-			envelope.Name            = "Test envelope";
-
-			envelope.Recipients = new[]
+		envelope.Documents.AddRange(new[]
+		{
+			new DocumentApiModel()
 			{
-				new RecipientApiModel()
+				Index = 1,
+				FileName = "bulksign_test_Sample.pdf",
+				FileContentByteArray = new FileContentByteArray()
 				{
-					Name = "Bulksign Test",
-					Email = "contact@bulksign.com",
-					Index = 1,
-					RecipientType = RecipientTypeApi.Signer
-				},
-
-				new RecipientApiModel()
-				{
-					Name = "Second Recipient",
-					Email = "second@bulksign.com",
-					Index = 1,
-					RecipientType = RecipientTypeApi.Signer
+					ContentBytes = ConversionUtilities.ConvertToByteString(
+						File.ReadAllBytes(Environment.CurrentDirectory + @"\Files\bulksign_test_Sample.pdf"))
 				}
-			};
-
-
-
-			envelope.Documents = new[]
+			},
+			new DocumentApiModel()
 			{
-				new DocumentApiModel()
+				Index = 2,
+				FileName = "forms.pdf",
+				FileContentByteArray = new FileContentByteArray()
 				{
-					Index = 1,
-					FileName = "bulksign_test_Sample.pdf",
-					FileContentByteArray = new FileContentByteArray()
-					{
-						ContentBytes = File.ReadAllBytes(Environment.CurrentDirectory + @"\Files\bulksign_test_Sample.pdf")
-					}
-				},
-				new DocumentApiModel()
-				{
-					Index = 2,
-					FileName = "forms.pdf",
-					FileContentByteArray = new FileContentByteArray()
-					{
-						ContentBytes = File.ReadAllBytes(Environment.CurrentDirectory + @"\Files\forms.pdf")
-					}
+					ContentBytes =
+						ConversionUtilities.ConvertToByteString(
+							File.ReadAllBytes(Environment.CurrentDirectory + @"\Files\forms.pdf"))
 				}
-			};
+			}
+		});
 
-			envelope.FileAccessMode = FileAccessModeTypeApi.Custom;
+		envelope.FileAccessMode = FileAccessModeTypeApi.Custom;
 
-			//assign different files to different recipients
+		//assign different files to different recipients
 
-			envelope.CustomFileAccess = new[]
+		envelope.CustomFileAccess.AddRange(new[]
+		{
+			//assign first file to first recipient
+			new CustomFileAccessApiModel()
 			{
-				//assign first file to first recipient
-				new CustomFileAccessApiModel()
-				{
-					RecipientEmail = envelope.Recipients[0].Email,
-					FileNames = new []{ "bulksign_test_Sample.pdf" }
-				},
+				RecipientEmail = envelope.Recipients[0].Email,
+				FileNames = { "bulksign_test_Sample.pdf" }
+			},
 
-				//assign first file to first recipient
-				new CustomFileAccessApiModel()
-				{
-					RecipientEmail = envelope.Recipients[1].Email,
-					FileNames = new[]
-					{
-						"forms.pdf"
-					}
-				}
-			};
+			//assign first file to first recipient
+			new CustomFileAccessApiModel()
+			{
+				RecipientEmail = envelope.Recipients[1].Email,
+				FileNames = { "forms.pdf" }
+			}
+		});
 
-			BulksignResult<SendEnvelopeResultApiModel> result = api.SendEnvelope(token, envelope);
-
+		try
+		{
+			SendEnvelopeResult result = ChannelManager.GetClient().SendEnvelope(envelope);
 
 			if (result.IsSuccessful)
 			{
-				Console.WriteLine("Access code for recipient " + result.Response.RecipientAccess[0].RecipientEmail + " is " + result.Response.RecipientAccess[0].AccessCode);
-				Console.WriteLine("Envelope id is : " + result.Response.EnvelopeId);
+				Console.WriteLine("Access code for recipient " + result.Result.RecipientAccess[0].RecipientEmail + " is " + result.Result.RecipientAccess[0].AccessCode);
+				Console.WriteLine("Envelope id is : " + result.Result.EnvelopeId);
 			}
 			else
 			{
 				Console.WriteLine($"Request failed : ErrorCode '{result.ErrorCode}' , Message {result.ErrorMessage}");
 			}
-
-
+		}
+		catch (Exception ex)
+		{
+			//handle failed request here
+			Console.WriteLine(ex.Message);
 		}
 	}
 }

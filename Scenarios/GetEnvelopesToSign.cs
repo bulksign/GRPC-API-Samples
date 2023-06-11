@@ -1,20 +1,22 @@
 ﻿using Bulksign.Api;
 using GrpcApiSamples;
 
-namespace Bulksign.ApiSamples
-{
-	public class GetEnvelopesToSign
-	{
-		public void RunSample()
-		{
-			AuthenticationApiModel token = new ApiKeys().GetAuthentication();
+namespace Bulksign.ApiSamples;
 
-			if (string.IsNullOrEmpty(token.Key))
-			{
-				Console.WriteLine("Please edit APiKeys.cs and put your own token/email");
-				return;
-			}
-				
+public class GetEnvelopesToSign
+{
+	public void RunSample()
+	{
+		AuthenticationApiModel token = new ApiKeys().GetAuthentication();
+
+		if (string.IsNullOrEmpty(token.Key))
+		{
+			Console.WriteLine("Please edit APiKeys.cs and put your own token/email");
+			return;
+		}
+
+		try
+		{
 			GetEnvelopesToSignResult result = ChannelManager.GetClient().GetEnvelopesToSign(token);
 
 			if (result.IsSuccessful)
@@ -25,6 +27,11 @@ namespace Bulksign.ApiSamples
 			{
 				Console.WriteLine("ERROR : " + result.ErrorCode + " " + result.ErrorMessage);
 			}
+		}
+		catch (Exception ex)
+		{
+			//handle failed request
+            Console.WriteLine(ex.Message);
 		}
 	}
 }

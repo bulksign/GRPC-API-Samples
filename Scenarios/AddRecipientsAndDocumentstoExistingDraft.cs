@@ -40,20 +40,29 @@ public class AddRecipientsAndDocumentsToExistingDraft
 						FileName = "myfile.pdf",
 						FileContentByteArray = new FileContentByteArray()
 						{
-							ContentBytes = ConversionUtilities.ConvertoToByteString( File.ReadAllBytes(Environment.CurrentDirectory + @"\Files\bulksign_test_Sample.pdf"))
+							ContentBytes = ConversionUtilities.ConvertToByteString( File.ReadAllBytes(Environment.CurrentDirectory + @"\Files\bulksign_test_Sample.pdf"))
 						}
 					}
 			);
 
-			EmptyResult result = ChannelManager.GetClient().AddDocumentsRecipientsToDraft(model);
 
-			if (result.IsSuccessful)
+			try
 			{
-				Console.WriteLine("Draft was successfully updated");
+				EmptyResult result = ChannelManager.GetClient().AddDocumentsRecipientsToDraft(model);
+
+				if (result.IsSuccessful)
+				{
+					Console.WriteLine("Draft was successfully updated");
+				}
+				else
+				{
+					Console.WriteLine("ERROR : " + result.ErrorCode + " " + result.ErrorMessage);
+				}
 			}
-			else
+			catch (Exception ex)
 			{
-				Console.WriteLine("ERROR : " + result.ErrorCode + " " + result.ErrorMessage);
+				//handle failed request
+				Console.WriteLine(ex.Message);
 			}
 		}
 }

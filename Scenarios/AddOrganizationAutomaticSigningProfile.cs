@@ -28,15 +28,23 @@ public class AddOrganizationAutomaticSigningProfile
 			//you can call GetSignatureImprints here, see sample from SigningImprints.cs
 			newProfile.SignatureImprintName = "";
 
-			EmptyResult result = ChannelManager.GetClient().AddOrganizationAutomaticSigningProfile(newProfile);
+			try
+			{
+				EmptyResult result = ChannelManager.GetClient().AddOrganizationAutomaticSigningProfile(newProfile);
 
-			if (result.IsSuccessful)
-			{
-				Console.WriteLine($"Signing profile was successfully created ");
+				if (result.IsSuccessful)
+				{
+					Console.WriteLine($"Signing profile was successfully created ");
+				}
+				else
+				{
+					Console.WriteLine("ERROR : " + result.ErrorCode + " " + result.ErrorMessage);
+				}
 			}
-			else
+			catch (Exception ex)
 			{
-				Console.WriteLine("ERROR : " + result.ErrorCode + " " + result.ErrorMessage);
+				//handle failed request here
+				Console.WriteLine(ex.Message);
 			}
 		}
 }

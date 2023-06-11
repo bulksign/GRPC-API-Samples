@@ -18,6 +18,5 @@ public class ChannelManager
 		}
 
 		return new GrpcApi.GrpcApiClient(channel);
-
 	}
 }

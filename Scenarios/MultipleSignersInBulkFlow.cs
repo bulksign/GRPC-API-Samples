@@ -1,78 +1,79 @@
-﻿using System;
-using System.IO;
-using Bulksign.Api;
+﻿using Bulksign.Api;
+using GrpcApiSamples;
 
-namespace Bulksign.ApiSamples
+namespace Bulksign.ApiSamples;
+
+public class MultipleSignersInBulkFlow
 {
-	public class MultipleSignersInBulkFlow
+	public void RunSample()
 	{
-		public void RunSample()
+
+		AuthenticationApiModel token = new ApiKeys().GetAuthentication();
+
+		if (string.IsNullOrEmpty(token.Key))
 		{
+			Console.WriteLine("Please edit APiKeys.cs and put your own token/email");
+			return;
+		}
 
-			AuthenticationApiModel token = new ApiKeys().GetAuthentication();
+		EnvelopeApiModelInput envelope = new  EnvelopeApiModelInput();
+		envelope.Authentication = token;
+		envelope.EnvelopeType = EnvelopeTypeApi.Bulk;
+		envelope.DaysUntilExpire = 10;
+		envelope.EmailMessage = "Please sign this document";
+		envelope.EmailSubject = "Please Bulksign this document";
+		envelope.Name = "Test envelope";
 
-			if (string.IsNullOrEmpty(token.Key))
+		//in bulk mode all recipients have the same index
+		envelope.Recipients.AddRange(new []
+		{
+			new RecipientApiModel()
 			{
-				Console.WriteLine("Please edit APiKeys.cs and put your own token/email");
-				return;
+				Name = "Bulksign Test",
+				Email = "contact@bulksign.com",
+				Index = 1,
+				RecipientType = RecipientTypeApi.Signer
+			},
+
+			new RecipientApiModel()
+			{
+				Name = "Second Test",
+				Email = "test@test.com",
+				Index = 1,
+				RecipientType = RecipientTypeApi.Signer
 			}
+		});
 
-
-			BulksignApiClient api = new BulksignApiClient();
-
-			EnvelopeApiModel envelope = new EnvelopeApiModel();
-			envelope.EnvelopeType    = EnvelopeTypeApi.Bulk;
-			envelope.DaysUntilExpire = 10;
-			envelope.EmailMessage    = "Please sign this document";
-			envelope.EmailSubject    = "Please Bulksign this document";
-			envelope.Name            = "Test envelope";
-
-			//in bulk mode all recipients have the same index
-			envelope.Recipients = new[]
+		envelope.Documents.Add(new DocumentApiModel()
 			{
-				new RecipientApiModel()
+				Index = 1,
+				FileName = "test.pdf",
+				FileContentByteArray = new FileContentByteArray()
 				{
-					Name = "Bulksign Test",
-					Email = "contact@bulksign.com",
-					Index = 1,
-					RecipientType = RecipientTypeApi.Signer
-				},
-				
-				new RecipientApiModel()
-				{
-					Name = "Second Test",
-					Email = "test@test.com",
-					Index = 1,
-					RecipientType = RecipientTypeApi.Signer
-				} 
-			};
-
-			envelope.Documents = new[] 
-			{ 
-				new DocumentApiModel()
-				{
-					Index = 1,
-					FileName = "test.pdf",
-					FileContentByteArray = new FileContentByteArray()
-					{
-						ContentBytes = File.ReadAllBytes(Environment.CurrentDirectory + @"\Files\bulksign_test_Sample.pdf")
-					}
+					ContentBytes = ConversionUtilities.ConvertToByteString( File.ReadAllBytes(Environment.CurrentDirectory + @"\Files\bulksign_test_Sample.pdf"))
 				}
-			};
+			}
+		);
 
-			BulksignResult<SendEnvelopeResultApiModel> result = api.SendEnvelope(token, envelope);
+		try
+		{
+			SendEnvelopeResult result = ChannelManager.GetClient().SendEnvelope(envelope);
 
 			if (result.IsSuccessful)
 			{
-				Console.WriteLine("Access code for recipient " + result.Response.RecipientAccess[0].RecipientEmail + " is " + result.Response.RecipientAccess[0].AccessCode);
-				Console.WriteLine("Envelope id is : " + result.Response.EnvelopeId);
+				Console.WriteLine("Access code for recipient " + result.Result.RecipientAccess[0].RecipientEmail + " is " + result.Result.RecipientAccess[0].AccessCode);
+				Console.WriteLine("Envelope id is : " + result.Result.EnvelopeId);
 			}
 			else
 			{
 				Console.WriteLine($"Request failed : ErrorCode '{result.ErrorCode}' , Message {result.ErrorMessage}");
 			}
-
+		}
+		catch (Exception ex)
+		{
+			//handle failed request
+			Console.WriteLine(ex.Message);
 		}
 	}
-
 }
+

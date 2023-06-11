@@ -91,7 +91,7 @@ namespace Bulksign.ApiSamples;
 					{
 						FileContentByteArray = new FileContentByteArray()
 						{
-							ContentBytes = ConversionUtilities.ConvertoToByteString(File.ReadAllBytes(Environment.CurrentDirectory + @"\Files\forms.pdf"))
+							ContentBytes = ConversionUtilities.ConvertToByteString(File.ReadAllBytes(Environment.CurrentDirectory + @"\Files\forms.pdf"))
 						},
 						FileName = "forms.pdf"
 					}
@@ -112,9 +112,10 @@ namespace Bulksign.ApiSamples;
 					Console.WriteLine("ERROR : " + result.ErrorCode + " " + result.ErrorMessage);
 				}
 			}
-			catch (Exception bex)
+			catch (Exception ex)
 			{
-				Console.WriteLine(bex.Message + Environment.NewLine);
+				//handle failed request here
+				Console.WriteLine(ex.Message);
 			}
 		}
 

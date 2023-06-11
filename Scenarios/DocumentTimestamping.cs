@@ -1,78 +1,76 @@
-﻿using System;
-using System.IO;
-using Bulksign.Api;
+﻿using Bulksign.Api;
+using GrpcApiSamples;
 
-namespace Bulksign.ApiSamples
+namespace Bulksign.ApiSamples;
+
+public class DocumentTimestamping
 {
-	public class DocumentTimestamping
+	public void RunSample()
 	{
-		public void RunSample()
+		AuthenticationApiModel token = new ApiKeys().GetAuthentication();
+
+		if (string.IsNullOrEmpty(token.Key))
 		{
+			Console.WriteLine("Please edit APiKeys.cs and put your own token/email");
+			return;
+		}
 
-			AuthenticationApiModel token = new ApiKeys().GetAuthentication();
+		EnvelopeApiModelInput envelope = new EnvelopeApiModelInput();
+		envelope.Authentication = token;
+		envelope.EnvelopeType = EnvelopeTypeApi.Serial;
+		envelope.DaysUntilExpire = 10;
+		envelope.EmailMessage = "Please sign this document";
+		envelope.EmailSubject = "Please Bulksign this document";
+		envelope.Name = "Test envelope";
 
-			if (string.IsNullOrEmpty(token.Key))
+		envelope.Recipients.Add(new RecipientApiModel()
 			{
-				Console.WriteLine("Please edit APiKeys.cs and put your own token/email");
-				return;
+				Name = "Bulksign Test",
+				Email = "contact@bulksign.com",
+				Index = 1,
+				RecipientType = RecipientTypeApi.Signer
 			}
+		);
 
-			BulksignApiClient api = new BulksignApiClient();
-
-			EnvelopeApiModel envelope = new EnvelopeApiModel();
-			envelope.EnvelopeType    = EnvelopeTypeApi.Serial;
-			envelope.DaysUntilExpire = 10;
-			envelope.EmailMessage    = "Please sign this document";
-			envelope.EmailSubject    = "Please Bulksign this document";
-			envelope.Name            = "Test envelope";
-
-			envelope.Recipients = new[]
+		envelope.Documents.Add(new DocumentApiModel()
 			{
-				new RecipientApiModel()
+				Index = 1,
+				FileName = "test.pdf",
+				FileContentByteArray = new FileContentByteArray()
 				{
-					Name = "Bulksign Test",
-					Email = "contact@bulksign.com",
-					Index = 1,
-					RecipientType = RecipientTypeApi.Signer
+					ContentBytes = ConversionUtilities.ConvertToByteString(
+						File.ReadAllBytes(Environment.CurrentDirectory + @"\Files\bulksign_test_Sample.pdf"))
 				}
-			};
+			}
+		);
 
-			envelope.Documents = new[]
-			{
-				new DocumentApiModel()
-				{
-					Index = 1,
-					FileName = "test.pdf",
-					FileContentByteArray = new FileContentByteArray()
-					{
-						ContentBytes = File.ReadAllBytes(Environment.CurrentDirectory + @"\Files\bulksign_test_Sample.pdf")
-					}
-				}
-			};
+		//Timestamping must be enabled from Settings\Signing for this to work
 
+		//enable timestamping once per document after all signers have signed the document(s)
+		envelope.DocumentTimestampType = DocumentTimestampTypeApi.Envelope;
 
-			//Timestamping must be enabled from Settings\Signing for this to work
+		//enable timestamping after each signer finishes signing the document(s)
+		//envelope.DocumentTimestampType = DocumentTimestampTypeApi.Recipient;
 
-			//enable timestamping once per document after all signers have signed the document(s)
-			envelope.DocumentTimestampType = DocumentTimestampTypeApi.Envelope;
-
-			//enable timestamping after each signer finishes signing the document(s)
-			//envelope.DocumentTimestampType = DocumentTimestampTypeApi.Recipient;
-
-
-			BulksignResult<SendEnvelopeResultApiModel> result = api.SendEnvelope(token, envelope);
-
+		try
+		{
+			SendEnvelopeResult result = ChannelManager.GetClient().SendEnvelope(envelope);
 
 			if (result.IsSuccessful)
 			{
-				Console.WriteLine("Access code for recipient " + result.Response.RecipientAccess[0].RecipientEmail + " is " + result.Response.RecipientAccess[0].AccessCode);
-				Console.WriteLine("Envelope id is : " + result.Response.EnvelopeId);
+				Console.WriteLine("Access code for recipient " + result.Result.RecipientAccess[0].RecipientEmail + " is " +
+				                  result.Result.RecipientAccess[0].AccessCode);
+				Console.WriteLine("Envelope id is : " + result.Result.EnvelopeId);
 			}
 			else
 			{
 				Console.WriteLine($"Request failed : ErrorCode '{result.ErrorCode}' , Message {result.ErrorMessage}");
 			}
-
+		}
+		catch (Exception ex)
+		{
+			//handle failed request here			
+			Console.WriteLine(ex.Message);
 		}
 	}
 }

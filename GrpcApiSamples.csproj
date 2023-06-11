@@ -8,25 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Scenarios\AddUserContact.cs" />
-    <Compile Remove="Scenarios\AllowRecipientDelegation.cs" />
-    <Compile Remove="Scenarios\AnalyzeFileAndDynamicallyAddSignatureFields.cs" />
-    <Compile Remove="Scenarios\AuthenticationProviders.cs" />
-    <Compile Remove="Scenarios\CancelEnvelope.cs" />
-    <Compile Remove="Scenarios\CustomDocumentAccess.cs" />
-    <Compile Remove="Scenarios\DisableEmailNotifications.cs" />
-    <Compile Remove="Scenarios\DocumentTimestamping.cs" />
-    <Compile Remove="Scenarios\DownloadEnvelopeCompletedDocuments.cs" />
-    <Compile Remove="Scenarios\GetCompletedFormFields.cs" />
-    <Compile Remove="Scenarios\GetDrafts.cs" />
-    <Compile Remove="Scenarios\GetEnvelopeDetails.cs" />
-    <Compile Remove="Scenarios\MultipleSignersConcurrentFlow.cs" />
-    <Compile Remove="Scenarios\MultipleSignersInBulkFlow.cs" />
-    <Compile Remove="Scenarios\MultipleSignersInSerialFlow.cs" />
-    <Compile Remove="Scenarios\OnboardNewOrganization.cs" />
-    <Compile Remove="Scenarios\OpenIdConnectAuthenticationForSigner.cs" />
-    <Compile Remove="Scenarios\OrganizationAutomaticSigningProfile.cs" />
-    <Compile Remove="Scenarios\OrganizationUsers.cs" />
     <Compile Remove="Scenarios\OverwriteFormFieldValues.cs" />
     <Compile Remove="Scenarios\PrepareSendEnvelope.cs" />
     <Compile Remove="Scenarios\PrepareSendEnvelopeWithTags.cs" />
@@ -45,7 +26,6 @@
     <Compile Remove="Scenarios\TextFieldValidation.cs" />
     <Compile Remove="Scenarios\UnlockConcurrentRecipient.cs" />
     <Compile Remove="Scenarios\UpdateOrganizationSettings.cs" />
-    <Compile Remove="Scenarios\UpdateUserSettings.cs" />
   </ItemGroup>
 
   <ItemGroup>

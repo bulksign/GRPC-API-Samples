@@ -1,10 +1,10 @@
-﻿using System;
-using Bulksign.Api;
+﻿using Bulksign.Api;
+using GrpcApiSamples;
 
-namespace Bulksign.ApiSamples
+namespace Bulksign.ApiSamples;
+
+public class DownloadEnvelopeCompletedDocuments
 {
-	public class DownloadEnvelopeCompletedDocuments
-	{
 		public void RunSample()
 		{
 			AuthenticationApiModel token = new ApiKeys().GetAuthentication();
@@ -15,21 +15,32 @@ namespace Bulksign.ApiSamples
 				return;
 			}
 
-			BulksignApiClient api = new BulksignApiClient();
-
-			BulksignResult<byte[]> result = api.DownloadEnvelopeCompletedDocuments(token, "your_envelope_id");
-
-			if (result.IsSuccessful)
+			EnvelopeIdInput id = new EnvelopeIdInput()
 			{
+				Authentication = token,
+				EnvelopeId = "your_envelope_id"
+			};
 
-				//the result here will by a byte[] of a zip file which contains all signed documents + audit trail file
+			try
+			{
+				DownloadEnvelopeCompletedDocumentsResult result = ChannelManager.GetClient().DownloadEnvelopeCompletedDocuments(id);
 
-				Console.WriteLine($"File size :  {result.Response.Length}");
+				if (result.IsSuccessful)
+				{
+					//convert the result to byte[]
+					byte[] zipFile = ConversionUtilities.ConvertToByteArray(result.Result);
+
+					Console.WriteLine($"File size :  {zipFile.Length}");
+				}
+				else
+				{
+					Console.WriteLine("ERROR : " + result.ErrorCode + " " + result.ErrorMessage);
+				}
 			}
-			else
+			catch (Exception ex)
 			{
-				Console.WriteLine("ERROR : " + result.ErrorCode + " " + result.ErrorMessage);
+				//handle failed request
+				Console.WriteLine(ex.Message);
 			}
 		}
-	}
 }
