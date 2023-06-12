@@ -1,5 +1,4 @@
-﻿using System;
-using Bulksign.Api;
+﻿using Bulksign.Api;
 using GrpcApiSamples;
 
 namespace Bulksign.ApiSamples
@@ -16,22 +15,31 @@ namespace Bulksign.ApiSamples
 				return;
 			}
 
-
-			SearchTeamMembersDrafts search = new SearchTeamMembersDrafts()
+			SearchTeamMembersDraftsInput search = new SearchTeamMembersDraftsInput()
 			{
-				
+				Authentication = token,
+				SearchTerm = "test"
 			};
 
-			BulksignResult<ItemResultApiModel[]> result = ChannelManager.GetClient().SearchTeamMembersDrafts(token, "test");
+			try
+			{
+				SearchTeamMembersDraftsResult result = ChannelManager.GetClient().SearchTeamMembersDrafts(search);
 
-			if (result.IsSuccessful)
-			{
-				Console.WriteLine($"Found {result.Response.Length} team member drafts");
+				if (result.IsSuccessful)
+				{
+					Console.WriteLine($"Found {result.Result.Count} team member drafts");
+				}
+				else
+				{
+					Console.WriteLine("ERROR : " + result.ErrorCode + " " + result.ErrorMessage);
+				}
 			}
-			else
+			catch (Exception ex)
 			{
-				Console.WriteLine("ERROR : " + result.ErrorCode + " " + result.ErrorMessage);
+				//handle failed request
+				Console.WriteLine(ex.Message);
 			}
+
 		}
 	}
 }

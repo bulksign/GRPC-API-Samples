@@ -8,12 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Scenarios\SearchTeamMembersDrafts.cs" />
-    <Compile Remove="Scenarios\TextFieldValidation.cs" />
-    <Compile Remove="Scenarios\UpdateUserSettings.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Remove=".gitignore" />
     <None Remove="api.proto" />
     <None Remove="LICENSE" />
