@@ -1,106 +1,103 @@
-﻿using System;
-using System.IO;
-using Bulksign.Api;
+﻿using Bulksign.Api;
+using GrpcApiSamples;
 
-namespace Bulksign.ApiSamples
+namespace Bulksign.ApiSamples;
+
+public class OverwriteFormFieldValues
 {
-	public class OverwriteFormFieldValues
+	public void RunSample()
 	{
-		public void RunSample()
+		AuthenticationApiModel token = new ApiKeys().GetAuthentication();
+
+		if (string.IsNullOrEmpty(token.Key))
 		{
-			AuthenticationApiModel token = new ApiKeys().GetAuthentication();
+			Console.WriteLine("Please edit APiKeys.cs and put your own token/email");
+			return;
+		}
 
-			if (string.IsNullOrEmpty(token.Key))
+		EnvelopeApiModelInput envelope = new EnvelopeApiModelInput();
+		envelope.Authentication = token;
+		envelope.EnvelopeType = EnvelopeTypeApi.Serial;
+		envelope.DaysUntilExpire = 10;
+		envelope.EmailMessage = "Please sign this document";
+		envelope.EmailSubject = "Please Bulksign this document";
+		envelope.Name = "Test envelope";
+
+		envelope.Recipients.Add(new RecipientApiModel
+		{
+			Name = "Bulksign Test",
+			Email = "enter_your_email_address",
+			Index = 1,
+			RecipientType = RecipientTypeApi.Signer
+		});
+
+		envelope.Documents.Add(new DocumentApiModel()
+		{
+			Index = 2,
+			FileName = "forms.pdf",
+			FileContentByteArray = new FileContentByteArray()
 			{
-				Console.WriteLine("Please edit APiKeys.cs and put your own token/email");
-				return;
-			}
+				ContentBytes = ConversionUtilities.ConvertToByteString(File.ReadAllBytes(Environment.CurrentDirectory + @"\Files\forms.pdf"))
+			},
 
-
-			BulksignApiClient api = new BulksignApiClient();
-
-			EnvelopeApiModel envelope = new EnvelopeApiModel();
-			envelope.EnvelopeType    = EnvelopeTypeApi.Serial;
-			envelope.DaysUntilExpire = 10;
-			envelope.EmailMessage    = "Please sign this document";
-			envelope.EmailSubject    = "Please Bulksign this document";
-			envelope.Name            = "Test envelope";
-
-			envelope.Recipients = new[]
-			{
-				new RecipientApiModel()
+			OverwriteValues =
 				{
-					Name = "Bulksign Test",
-					Email = "enter_your_email_address",
-					Index = 1,
-					RecipientType = RecipientTypeApi.Signer
-				}
-			};
-
-			envelope.Documents = new[]
-			{
-				new DocumentApiModel()
-				{
-					Index = 2,
-					FileName = "forms.pdf",
-					FileContentByteArray = new FileContentByteArray()
+					//overwrite textbox value 
+					new OverwriteFieldValueApiModel()
 					{
-						ContentBytes = File.ReadAllBytes(Environment.CurrentDirectory + @"\Files\forms.pdf")
+						FieldName  = "Text1",
+						FieldValue = "This is a test text"
+					},
+					//select a specific radio button 
+					new OverwriteFieldValueApiModel()
+					{
+						FieldName  = "Group3",
+						FieldValue = "Choice2"
 					},
 
-					OverwriteValues = new []
+					//select a checkbox 
+					new OverwriteFieldValueApiModel()
 					{
-						//overwrite textbox value 
-						new OverwriteFieldValueApiModel()
-						{
-							FieldName = "Text1",
-							FieldValue = "This is a test text"
-						},
-						//select a specific radio button 
-						new OverwriteFieldValueApiModel()
-						{
-							FieldName = "Group3",
-							FieldValue = "Choice2"
-						},
+						FieldName  = "Check Box2",
+						FieldValue = "True"
+					},
 
-						//select a checkbox 
-						new OverwriteFieldValueApiModel()
-						{
-							FieldName = "Check Box2",
-							FieldValue = "True"
-						},
+					//selected value in combobox
+					new OverwriteFieldValueApiModel()
+					{
+						FieldName  = "Dropdown5",
+						FieldValue = "Item3"
+					},
 
-						//selected value in combobox
-						new OverwriteFieldValueApiModel()
-						{
-							FieldName = "Dropdown5",
-							FieldValue = "Item3"
-						},
-
-						//selected value in combobox
-						new OverwriteFieldValueApiModel()
-						{
-							FieldName = "List Box4",
-							FieldValue = "Item2"
-						}
-
+					//selected value in combobox
+					new OverwriteFieldValueApiModel()
+					{
+						FieldName  = "List Box4",
+						FieldValue = "Item2"
 					}
+
 				}
-			};
+		}
+		);
 
-
-			BulksignResult<SendEnvelopeResultApiModel> result = api.SendEnvelope(token, envelope);
+		try
+		{
+			SendEnvelopeResult result = ChannelManager.GetClient().SendEnvelope(envelope);
 
 			if (result.IsSuccessful)
 			{
-				Console.WriteLine("Access code for recipient " + result.Response.RecipientAccess[0].RecipientEmail + " is " + result.Response.RecipientAccess[0].AccessCode);
-				Console.WriteLine("Envelope id is : " + result.Response.EnvelopeId);
+				Console.WriteLine("Access code for recipient " + result.Result.RecipientAccess[0].RecipientEmail + " is " + result.Result.RecipientAccess[0].AccessCode);
+				Console.WriteLine("Envelope id is : " + result.Result.EnvelopeId);
 			}
 			else
 			{
 				Console.WriteLine($"Request failed : ErrorCode '{result.ErrorCode}' , Message {result.ErrorMessage}");
 			}
-
+		}
+		catch (Exception ex)
+		{
+			//handle failed request
+			Console.WriteLine(ex.Message);
 		}
 	}
 }

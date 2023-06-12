@@ -1,28 +1,29 @@
-﻿using System;
-using Bulksign.Api;
+﻿using Bulksign.Api;
+using GrpcApiSamples;
 
-namespace Bulksign.ApiSamples
+namespace Bulksign.ApiSamples;
+
+public class UpdateOrganizationSettings
 {
-	public class UpdateOrganizationSettings
+	public void RunSample()
 	{
-		public void RunSample()
+		AuthenticationApiModel token = new ApiKeys().GetAuthentication();
+
+		if (string.IsNullOrEmpty(token.Key))
 		{
-			AuthenticationApiModel token = new ApiKeys().GetAuthentication();
+			Console.WriteLine("Please edit APiKeys.cs and put your own token/email");
+			return;
+		}
 
-			if (string.IsNullOrEmpty(token.Key))
-			{
-				Console.WriteLine("Please edit APiKeys.cs and put your own token/email");
-				return;
-			}
+		OrganizationUpdateSettingsApiModelInput newSettings = new OrganizationUpdateSettingsApiModelInput();
+		newSettings.Authentication = token;
 
-			BulksignApiClient api = new BulksignApiClient();
+		//we need to set only the values we want updated
+		newSettings.Name           = "New Organization Name";
 
-			//we need to set only the values you want updated
-			OrganizationUpdateSettingsApiModel newSettings = new OrganizationUpdateSettingsApiModel();
-
-			newSettings.Name = "New Organization Name";
-
-			BulksignResult<string> result = api.UpdateOrganizationSettings(token,newSettings);
+		try
+		{
+			EmptyResult result = ChannelManager.GetClient().UpdateOrganizationSettings(newSettings);
 
 			if (result.IsSuccessful)
 			{
@@ -33,5 +34,12 @@ namespace Bulksign.ApiSamples
 				Console.WriteLine("ERROR : " + result.ErrorCode + " " + result.ErrorMessage);
 			}
 		}
+		catch (Exception ex)
+		{
+			//handle failed request
+			Console.WriteLine(ex.Message);
+		}
+
 	}
 }
+

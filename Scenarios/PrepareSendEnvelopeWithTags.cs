@@ -1,100 +1,118 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using Bulksign.Api;
+﻿using Bulksign.Api;
+using GrpcApiSamples;
 
-namespace Bulksign.ApiSamples
+namespace Bulksign.ApiSamples;
+
+public class PrepareSendEnvelopeWithTags
 {
-	public class PrepareSendEnvelopeWithTags
+	public void RunSample()
 	{
-		public void RunSample()
+		AuthenticationApiModel token = new ApiKeys().GetAuthentication();
+
+		if (string.IsNullOrEmpty(token.Key))
 		{
-			AuthenticationApiModel token = new ApiKeys().GetAuthentication();
+			Console.WriteLine("Please edit APiKeys.cs and put your own token/email");
+			return;
+		}
 
-			if (string.IsNullOrEmpty(token.Key))
-			{
-				Console.WriteLine("Please edit APiKeys.cs and put your own token/email");
-				return;
-			}
+		FileInput firstFile = new FileInput
+		{
+			Filename = "bulksign_test_Sample.odt",
+			FileContent = ConversionUtilities.ConvertToByteString(File.ReadAllBytes(Environment.CurrentDirectory + @"\Files\bulksign_advanced_tags.odt"))
+		};
 
-			BulksignApiClient api = new BulksignApiClient();
+		PrepareEnvelopeApiModelInput prepare = new PrepareEnvelopeApiModelInput();
+		prepare.Authentication = token;
 
-			FileInput firstFile = new FileInput
-			{
-				Filename    = "bulksign_test_Sample.odt",
-				FileContent = File.ReadAllBytes(Environment.CurrentDirectory + @"\Files\bulksign_advanced_tags.odt")
-			};
+		//flag that determines if the PDF documents should be parsed for tags
+		prepare.DocumentParseOptions = new DocumentParseOptionApiModel
+		{
+			ParseTags = true,
+			DeleteTagText = true
+		};
 
-			PrepareEnvelopeApiModel prepare = new PrepareEnvelopeApiModel();
+		prepare.Files.Add(firstFile);
 
-			//flag that determines if the PDF documents should be parsed for tags
-			prepare.DocumentParseOptions = new DocumentParseOptionApiModel
-			{
-				ParseTags     = true,
-				DeleteTagText = true
-			};
+		PrepareSendEnvelopeResult result = null;
 
-			prepare.Files = new[]
-			{
-				firstFile
-			};
+		try
+		{
+			result = ChannelManager.GetClient().PrepareSendEnvelope(prepare);
+		}
+		catch (Exception ex)
+		{
+			//handle failed request
+			Console.WriteLine(ex.Message);
+			return;
+		}
 
-			BulksignResult<EnvelopeApiModel> result = api.PrepareSendEnvelope(token,prepare);
 
-			//the model will include 2 placeholder recipients because we have 2 tags in the documents with different indexes
+		if (!result.IsSuccessful)
+		{
+			Console.WriteLine($"Request failed : ErrorCode '{result.ErrorCode}' , Message {result.ErrorMessage}");
+			return;
+		}
 
-			if (result.IsSuccessful)
-			{
-				EnvelopeApiModel model = result.Response;
 
-				//now change the email placeholder with the real recipient email address
-				model.Recipients[0].Email = "test@email.com";
-				model.Recipients[0].Name  = "First Recipient";
+		//the model will include 2 placeholder recipients because we have 2 tags in the documents with different indexes
+		EnvelopeApiModelInput model = result.Result;
 
-				model.Recipients[0].Email = "second@email.com";
-				model.Recipients[0].Name  = "Second Recipient";
+		//now change the email placeholder with the real recipient email address
+		model.Recipients[0].Email = "test@email.com";
+		model.Recipients[0].Name = "First Recipient";
 
-				//now re-assign the form fields, we already know the ids 
+		model.Recipients[0].Email = "second@email.com";
+		model.Recipients[0].Name = "Second Recipient";
 
-				List<AssignmentApiModel> assignments = new List<AssignmentApiModel>();
+		//now re-assign the form fields, we already know the tag identifiers from the file
 
-				assignments.Add(new AssignmentApiModel
-				{
-					AssignedToRecipientEmail = model.Recipients[0].Email,
-					Signatures = new[]
+		List<AssignmentApiModel> assignments = new List<AssignmentApiModel>();
+
+		assignments.Add(new AssignmentApiModel
+		{
+			AssignedToRecipientEmail = model.Recipients[0].Email,
+			Signatures = {
+					new SignatureAssignmentApiModel
 					{
-						new SignatureAssignmentApiModel
-						{
-							FieldId       = "sigFieldSender",
-							SignatureType = SignatureTypeApi.DrawTypeToSign
-						}
+						FieldId       = "sigFieldSender",
+						SignatureType = SignatureTypeApi.DrawTypeToSign
 					}
-				});
+				}
+		});
 
-				assignments.Add(new AssignmentApiModel
-				{
-					AssignedToRecipientEmail = model.Recipients[1].Email,
-					Signatures = new[]
+		assignments.Add(new AssignmentApiModel
+		{
+			AssignedToRecipientEmail = model.Recipients[1].Email,
+			Signatures = {
+					new SignatureAssignmentApiModel
 					{
-						new SignatureAssignmentApiModel
-						{
-							FieldId       = "sigFieldCustomer",
-							SignatureType = SignatureTypeApi.ClickToSign
-						}
+						FieldId       = "sigFieldCustomer",
+						SignatureType = SignatureTypeApi.ClickToSign
 					}
-				});
+				}
+		});
 
-				model.Documents[0].FieldAssignments = assignments.ToArray();
+		model.Documents[0].FieldAssignments.AddRange(assignments.ToArray());
 
-				BulksignResult<SendEnvelopeResultApiModel> envelope = api.SendEnvelope(token,model);
+		try
+		{
 
-				if (result.IsSuccessful)
-					Console.WriteLine($"Envelope with id {envelope.Response.EnvelopeId} was created");
+			SendEnvelopeResult rs = ChannelManager.GetClient().SendEnvelope(model);
+
+			if (rs.IsSuccessful)
+			{
+				Console.WriteLine($"Envelope with id {rs.Result.EnvelopeId} was created");
 			}
 			else
 			{
 				Console.WriteLine($"Request failed : ErrorCode '{result.ErrorCode}' , Message {result.ErrorMessage}");
 			}
 		}
+		catch (Exception ex)
+		{
+			//handle failed request
+			Console.WriteLine(ex.Message);
+		}
+
 	}
 }

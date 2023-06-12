@@ -1,30 +1,45 @@
-﻿using System;
-using Bulksign.Api;
+﻿using Bulksign.Api;
+using GrpcApiSamples;
 
-namespace Bulksign.ApiSamples
+namespace Bulksign.ApiSamples;
+
+public class SearchTeamMembersTemplates
 {
-	public class SearchTeamMembersTemplates
+
+	public void RunSample()
 	{
+		AuthenticationApiModel token = new ApiKeys().GetAuthentication();
 
-		public void RunSample()
+		if (string.IsNullOrEmpty(token.Key))
 		{
-			AuthenticationApiModel token = new ApiKeys().GetAuthentication();
+			Console.WriteLine("Please edit APiKeys.cs and put your own token/email");
+			return;
+		}
 
-			if (string.IsNullOrEmpty(token.Key))
-			{
-				Console.WriteLine("Please edit APiKeys.cs and put your own token/email");
-				return;
-			}
+		SearchTeamMembersTemplatesInput search = new SearchTeamMembersTemplatesInput()
+		{
+			Authentication = token,
+			SearchTerm     = "test"
+		};
 
-			BulksignApiClient api = new BulksignApiClient();
-
-			BulksignResult<ItemResultApiModel[]> result = api.SearchTeamMembersTemplates(token,"test");
+		try
+		{
+			SearchTeamMembersTemplatesResult result = ChannelManager.GetClient().SearchTeamMembersTemplates(search);
 
 			if (result.IsSuccessful)
-				Console.WriteLine($"Found {result.Response.Length} team member templates");
+			{
+				Console.WriteLine($"Found {result.Result.Count} team member templates");
+			}
 			else
+			{
 				Console.WriteLine("ERROR : " + result.ErrorCode + " " + result.ErrorMessage);
+			}
 		}
-		
+		catch (Exception ex)
+		{
+			//handle failed request
+			Console.WriteLine(ex.Message);
+		}
 	}
+
 }

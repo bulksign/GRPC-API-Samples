@@ -1,75 +1,92 @@
-﻿using System;
-using System.IO;
-using Bulksign.Api;
+﻿using Bulksign.Api;
+using GrpcApiSamples;
 
-namespace Bulksign.ApiSamples
+namespace Bulksign.ApiSamples;
+
+public class PrepareSendEnvelope
 {
-	public class PrepareSendEnvelope
+	public void RunSample()
 	{
-		public void RunSample()
+		AuthenticationApiModel token = new ApiKeys().GetAuthentication();
+
+		if (string.IsNullOrEmpty(token.Key))
 		{
-			AuthenticationApiModel token = new ApiKeys().GetAuthentication();
+			Console.WriteLine("Please edit APiKeys.cs and put your own token/email");
+			return;
+		}
 
-			if (string.IsNullOrEmpty(token.Key))
+		FileInput firstFile = new FileInput()
+		{
+			Filename    = "bulksign_test_Sample.pdf",
+			FileContent = ConversionUtilities.ConvertToByteString(File.ReadAllBytes(Environment.CurrentDirectory + @"\Files\bulksign_test_Sample.pdf"))
+		};
+
+		PrepareEnvelopeApiModelInput prepare = new PrepareEnvelopeApiModelInput();
+		prepare.Authentication = token;
+
+		//flag that determines if the PDF documents should be parsed for tags
+		prepare.DocumentParseOptions = new DocumentParseOptionApiModel()
+		{
+			ParseTags     = false,
+			DeleteTagText = false
+		};
+
+		prepare.Files.Add(firstFile);
+
+		PrepareSendEnvelopeResult result = null;
+
+		try
+		{
+			result = ChannelManager.GetClient().PrepareSendEnvelope(prepare);
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine("Request failed :  " + ex.Message);
+			return;
+		}
+
+		if (result.IsSuccessful == false)
+		{
+			Console.WriteLine($"Request failed : ErrorCode '{result.ErrorCode}' , Message {result.ErrorMessage}");
+			return;
+		}
+
+		//we will used the model returned by the Prepare request
+		EnvelopeApiModelInput model = result.Result;
+
+		//now change the email placeholder with the real recipient email address
+		model.Recipients[0].Email = "enter_recipient_email_here";
+		model.Recipients[0].Name  = "RecipientName";
+
+		//assign all form fields to the first recipient . Obviously if you have multiple recipients, assign the fields as needed
+		foreach (DocumentApiModel document in model.Documents)
+		{
+			foreach (AssignmentApiModel assignment in document.FieldAssignments)
 			{
-				Console.WriteLine("Please edit APiKeys.cs and put your own token/email");
-				return;
+				assignment.AssignedToRecipientEmail = model.Recipients[0].Email;
 			}
+		}
 
-			BulksignApiClient api = new BulksignApiClient();
+		try
+		{
+			//now send the envelope using this model
+			SendEnvelopeResult rs = ChannelManager.GetClient().SendEnvelope(model);
 
-			FileInput firstFile = new FileInput()
+			if (rs.IsSuccessful)
 			{
-				Filename = "bulksign_test_Sample.pdf",
-				FileContent = File.ReadAllBytes(Environment.CurrentDirectory + @"\Files\bulksign_test_Sample.pdf")
-			};
-
-			PrepareEnvelopeApiModel prepare = new PrepareEnvelopeApiModel();
-
-			//flag that determines if the PDF documents should be parsed for tags
-			prepare.DocumentParseOptions = new DocumentParseOptionApiModel()
-			{
-				ParseTags     = false,
-				DeleteTagText = false
-			};
-
-			prepare.Files = new[]
-			{
-				firstFile
-			};
-
-			BulksignResult<EnvelopeApiModel> result = api.PrepareSendEnvelope(token, prepare);
-
-			if (result.IsSuccessful)
-			{
-				EnvelopeApiModel model = result.Response;
-
-				//now change the email placeholder with the real recipient email address
-				model.Recipients[0].Email = "enter_recipient_email_here";
-				model.Recipients[0].Name = "RecipientName";
-
-				//assign all form fields to the first recipient . 
-				//Obviously if you have multiple recipients, assign the fields as needed
-				foreach (DocumentApiModel document in model.Documents)
-				{
-					foreach (AssignmentApiModel assignment in document.FieldAssignments)
-					{
-						assignment.AssignedToRecipientEmail = model.Recipients[0].Email;
-					}
-				}
-
-				BulksignResult<SendEnvelopeResultApiModel> envelope = api.SendEnvelope(token, model);
-
-				if (result.IsSuccessful)
-				{
-					Console.WriteLine($"Envelope with id {envelope.Response.EnvelopeId} was created");
-				}
+				Console.WriteLine($"Envelope with id {rs.Result.EnvelopeId} was created");
 			}
 			else
 			{
 				Console.WriteLine($"Request failed : ErrorCode '{result.ErrorCode}' , Message {result.ErrorMessage}");
 			}
-
 		}
+		catch (Exception ex)
+		{
+			//handle failed request
+			Console.WriteLine(ex.Message);
+		}
+
+
 	}
 }

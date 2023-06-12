@@ -1,49 +1,50 @@
-using System;
 using Bulksign.Api;
+using GrpcApiSamples;
 
-namespace Bulksign.ApiSamples
+namespace Bulksign.ApiSamples;
+
+public class ReplaceEnvelopeRecipientSample
 {
-	public class ReplaceEnvelopeRecipientSample
+	public void RunSample()
 	{
-		public void RunSample()
+		AuthenticationApiModel token = new ApiKeys().GetAuthentication();
+
+		if (string.IsNullOrEmpty(token.Key))
 		{
-			AuthenticationApiModel token = new ApiKeys().GetAuthentication();
+			Console.WriteLine("Please edit APiKeys.cs and put your own token/email");
+			return;
+		}
 
-			if (string.IsNullOrEmpty(token.Key))
+		ReplaceEnvelopeRecipientApiModelInput re = new ReplaceEnvelopeRecipientApiModelInput
+		{
+			Authentication = token,
+			EnvelopeId  = "",
+			Name        = "New Recipient Name",
+			PhoneNumber = "+000000000000",
+			Email       = "new_email_address",
+
+			//here is how to set up password authentication for the new recipient
+			RecipientAuthenticationMethods =
 			{
-				Console.WriteLine("Please edit APiKeys.cs and put your own token/email");
-				return;
-			}
-
-			BulksignApiClient api = new BulksignApiClient();
-
-			ReplaceEnvelopeRecipientApiModelInput re = new ReplaceEnvelopeRecipientApiModelInput
-			{
-				EnvelopeId  = "",
-				Name        = "New Recipient Name",
-				PhoneNumber = "+000000000000",
-				Email       = "new_email_address",
-
-				//here is how to set up password authentication for the new recipient
-				RecipientAuthenticationMethods = new[]
+				new RecipientAuthenticationApiModel
 				{
-					new RecipientAuthenticationApiModel
-					{
-						AuthenticationType = RecipientAuthenticationTypeApi.Password,
-						Details            = "_insert_recipient_password"
-					}
-				},
-
-				//specifying the recipient to be replace can be done in multiple ways 
-				//here is an example by specifying the email of the existing recipient
-				ByEmail = new FindRecipientByEmailApiModel
-				{
-					RecipientEmail = "existing_recipient_email",
-					RecipientType  = RecipientTypeApi.Signer
+					AuthenticationType = RecipientAuthenticationTypeApi.Password,
+					Details            = "_insert_recipient_password"
 				}
-			};
+			},
 
-			BulksignResult<string> result = api.ReplaceEnvelopeRecipient(token,re);
+			//specifying the recipient to be replace can be done in multiple ways 
+			//here is an example by specifying the email of the existing recipient
+			ByEmail = new FindRecipientByEmailApiModel
+			{
+				RecipientEmail = "existing_recipient_email",
+				RecipientType  = RecipientTypeApi.Signer
+			}
+		};
+
+		try
+		{
+			EmptyResult result = ChannelManager.GetClient().ReplaceEnvelopeRecipient(re);
 
 			if (result.IsSuccessful)
 			{
@@ -54,5 +55,11 @@ namespace Bulksign.ApiSamples
 				Console.WriteLine("ERROR : " + result.ErrorCode + " " + result.ErrorMessage);
 			}
 		}
+		catch (Exception ex)
+		{
+			//handle failed request
+			Console.WriteLine(ex.Message);
+		}
+
 	}
 }

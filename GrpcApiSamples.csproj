@@ -8,28 +8,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Scenarios\OverwriteFormFieldValues.cs" />
-    <Compile Remove="Scenarios\PrepareSendEnvelope.cs" />
-    <Compile Remove="Scenarios\PrepareSendEnvelopeWithTags.cs" />
-    <Compile Remove="Scenarios\PreventFinishedDocumentToAllSigners.cs" />
-    <Compile Remove="Scenarios\ReplaceEnvelopeRecipient.cs" />
-    <Compile Remove="Scenarios\RestartEnvelope.cs" />
-    <Compile Remove="Scenarios\SearchEnvelopes.cs" />
     <Compile Remove="Scenarios\SearchTeamMembersDrafts.cs" />
-    <Compile Remove="Scenarios\SearchTeamMembersEnvelopes.cs" />
-    <Compile Remove="Scenarios\SearchTeamMembersTemplates.cs" />
-    <Compile Remove="Scenarios\SendEnvelopeDocumentNetworkShare.cs" />
-    <Compile Remove="Scenarios\SendEnvelopeFromTemplateOverwriteRecipients.cs" />
-    <Compile Remove="Scenarios\SendEnvelopeRemoteSignatureProvider.cs" />
-    <Compile Remove="Scenarios\SingleDocumentApproverAndSigner.cs" />
-    <Compile Remove="Scenarios\StampSignatures.cs" />
     <Compile Remove="Scenarios\TextFieldValidation.cs" />
-    <Compile Remove="Scenarios\UnlockConcurrentRecipient.cs" />
-    <Compile Remove="Scenarios\UpdateOrganizationSettings.cs" />
+    <Compile Remove="Scenarios\UpdateUserSettings.cs" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove=".gitignore" />
     <None Remove="api.proto" />
+    <None Remove="LICENSE" />
+    <None Remove="README.md" />
   </ItemGroup>
 
   <ItemGroup>
@@ -43,6 +31,15 @@
 
   <ItemGroup>
     <Protobuf Include="api.proto" GrpcServices="Client" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Files\bulksign_advanced_tags.odt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Files\bulksign_test_sample.pdf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

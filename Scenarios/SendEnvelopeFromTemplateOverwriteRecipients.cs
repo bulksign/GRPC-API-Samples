@@ -1,69 +1,76 @@
-﻿using System;
-using Bulksign.Api;
+﻿using Bulksign.Api;
+using GrpcApiSamples;
 
-namespace Bulksign.ApiSamples
+namespace Bulksign.ApiSamples;
+
+public class SendEnvelopeFromTemplateOverwriteRecipients
 {
-	public class SendEnvelopeFromTemplateOverwriteRecipients
+	public void RunSample()
 	{
-		public void RunSample()
+
+		AuthenticationApiModel token = new ApiKeys().GetAuthentication();
+
+		if (string.IsNullOrEmpty(token.Key))
+		{
+			Console.WriteLine("Please edit APiKeys.cs and put your own token/email");
+			return;
+		}
+
+		//replace the identifier with your template Id
+		string templateId = "__insert_your_template_id_here__";
+
+
+		EnvelopeFromTemplateApiModelInput model = new EnvelopeFromTemplateApiModelInput()
+		{
+			ReplaceRecipients = 
+			{
+				new TemplateReplaceRecipientApiModel()
+				{
+					//determine the recipient that we are replacing by specifying the email address
+					ByEmail = new FindRecipientByEmailApiModel()
+					{
+						RecipientEmail = "a@a.com",
+						RecipientType  = RecipientTypeApi.Signer
+					},
+					//specify the information for the new recipient
+					Name  = "Test A",
+					Email = "myemail@email.com"
+				},
+				new TemplateReplaceRecipientApiModel()
+				{
+					ByEmail = new FindRecipientByEmailApiModel()
+					{
+						RecipientEmail = "b@b.com",
+						RecipientType  = RecipientTypeApi.Signer
+					},
+					Name  = "Test B",
+					Email = "myemailbb@email.com"
+				}
+			},
+			TemplateId = templateId
+		};
+
+
+		try
 		{
 
-			AuthenticationApiModel token = new ApiKeys().GetAuthentication();
-
-			if (string.IsNullOrEmpty(token.Key))
-			{
-				Console.WriteLine("Please edit APiKeys.cs and put your own token/email");
-				return;
-			}
-			
-
-			BulksignApiClient api = new BulksignApiClient();
-
-			//replace the identifier with your template Id
-			string templateId = "d8a308e8-dd03-ec11-908d-d050997b638e";
-
-
-			//we are sending 
-			BulksignResult<SendEnvelopeResultApiModel> result = api.SendEnvelopeFromTemplate(token, new EnvelopeFromTemplateApiModel()
-			{
-				ReplaceRecipients = new[]
-				{
-					new TemplateReplaceRecipientApiModel()
-					{
-						//determine the recipient that we are replacing by specifying the email address
-						ByEmail = new FindRecipientByEmailApiModel()
-						{
-							RecipientEmail = "a@a.com",
-							RecipientType = RecipientTypeApi.Signer
-						},
-						//specify the information for the new recipient
-						Name = "Test A", 
-						Email = "myemail@email.com"
-					},
-					new TemplateReplaceRecipientApiModel()
-					{
-						ByEmail = new FindRecipientByEmailApiModel()
-						{
-							RecipientEmail = "b@b.com",
-							RecipientType = RecipientTypeApi.Signer
-						},
-						Name = "Test B", 
-						Email = "myemailbb@email.com"
-					}
-				},
-				TemplateId = templateId
-			});
+			SendEnvelopeFromTemplateResult result = ChannelManager.GetClient().SendEnvelopeFromTemplate(model);
 
 			if (result.IsSuccessful)
 			{
-				Console.WriteLine("Access code for recipient " + result.Response.RecipientAccess[0].RecipientEmail + " is " + result.Response.RecipientAccess[0].AccessCode);
-				Console.WriteLine("EnvelopeId is : " + result.Response.EnvelopeId);
+				Console.WriteLine("Access code for recipient " + result.Result.RecipientAccess[0].RecipientEmail + " is " + result.Result.RecipientAccess[0].AccessCode);
+				Console.WriteLine("EnvelopeId is : " + result.Result.EnvelopeId);
 			}
 			else
 			{
 				Console.WriteLine("ERROR : " + result.ErrorCode + " " + result.ErrorMessage);
 			}
-
 		}
+		catch (Exception ex)
+		{
+			//handle failed request
+			Console.WriteLine(ex.Message);
+		}
+
 	}
 }

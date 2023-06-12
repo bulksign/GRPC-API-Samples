@@ -1,5 +1,5 @@
-﻿using System;
-using Bulksign.Api;
+﻿using Bulksign.Api;
+using GrpcApiSamples;
 
 namespace Bulksign.ApiSamples
 {
@@ -14,20 +14,34 @@ namespace Bulksign.ApiSamples
 				Console.WriteLine("Please edit APiKeys.cs and put your own token/email");
 				return;
 			}
-
-			BulksignApiClient api = new BulksignApiClient();
-
-			BulksignResult<ItemResultApiModel[]> result = api.SearchEnvelopes(token, "test");
-
-			if (result.IsSuccessful)
+			
+			SearchEnvelopesInput search = new SearchEnvelopesInput()
 			{
-				Console.WriteLine($"Found {result.Response.Length} envelopes");
-			}
-			else
+				Authentication       = token,
+				SearchTerm           = "test",
+				SearchEnvelopeStatus = SearchEnvelopeStatus.Any // will search in ALL envelopes indifferent of status
+			};
+
+			try
 			{
-				Console.WriteLine("ERROR : " + result.ErrorCode + " " + result.ErrorMessage);
+
+				SearchEnvelopesResult result = ChannelManager.GetClient().SearchEnvelopes(search);
+
+				if (result.IsSuccessful)
+				{
+					Console.WriteLine($"Found {result.Result.Count} envelopes");
+				}
+				else
+				{
+					Console.WriteLine("ERROR : " + result.ErrorCode + " " + result.ErrorMessage);
+				}
 			}
+			catch (Exception ex)
+			{
+				//handle failed request
+				Console.WriteLine(ex.Message);
+			}
+
 		}
-
 	}
 }

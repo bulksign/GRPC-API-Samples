@@ -1,5 +1,6 @@
 ﻿using System;
 using Bulksign.Api;
+using GrpcApiSamples;
 
 namespace Bulksign.ApiSamples
 {
@@ -15,9 +16,13 @@ namespace Bulksign.ApiSamples
 				return;
 			}
 
-			BulksignApiClient api = new BulksignApiClient();
 
-			BulksignResult<ItemResultApiModel[]> result = api.SearchTeamMembersDrafts(token, "test");
+			SearchTeamMembersDrafts search = new SearchTeamMembersDrafts()
+			{
+				
+			};
+
+			BulksignResult<ItemResultApiModel[]> result = ChannelManager.GetClient().SearchTeamMembersDrafts(token, "test");
 
 			if (result.IsSuccessful)
 			{

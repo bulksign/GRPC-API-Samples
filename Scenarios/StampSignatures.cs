@@ -1,122 +1,140 @@
-using System;
-using System.IO;
-using System.Linq;
 using Bulksign.Api;
+using GrpcApiSamples;
 
-namespace Bulksign.ApiSamples
+namespace Bulksign.ApiSamples;
+
+public class StampSignatures
 {
-	public class StampSignatures
+	public void RunSample()
 	{
-		public void RunSample()
+		AuthenticationApiModel token = new ApiKeys().GetAuthentication();
+
+		if (string.IsNullOrEmpty(token.Key))
 		{
-			AuthenticationApiModel token = new ApiKeys().GetAuthentication();
+			Console.WriteLine("Please edit APiKeys.cs and put your own token/email");
+			return;
+		}
 
-			if (string.IsNullOrEmpty(token.Key))
+		GrpcApi.GrpcApiClient client = ChannelManager.GetClient();
+
+		//for this sample we require to define at least 1 signature stamp
+		GetSignatureStampsResult stamps = null;
+
+		try
+		{
+			stamps = client.GetSignatureStamps(token);
+		}
+		catch (Exception ex)
+		{
+			//handle failed request
+			Console.WriteLine(ex.Message);
+			return;
+		}
+
+		if (!stamps.IsSuccessful)
+		{
+			Console.WriteLine($"Request failed : ErrorCode '{stamps.ErrorCode}' , Message {stamps.ErrorMessage}");
+			return;
+		}
+
+
+		if (stamps.Result.Any() == false)
+		{
+			Console.WriteLine("This sample requires to have at least 1 signature stamp. ");
+			return;
+		}
+
+
+		//load the imprints too
+		GetSignatureImprintsResult imprints = client.GetSignatureImprints(token);
+
+
+		EnvelopeApiModelInput envelope = new EnvelopeApiModelInput();
+		envelope.Authentication                  = token;
+		envelope.EnvelopeType                    = EnvelopeTypeApi.Serial;
+		envelope.DaysUntilExpire                 = 10;
+		envelope.DisableSignerEmailNotifications = false;
+
+		envelope.Recipients.Add(new RecipientApiModel
+		{
+			Name          = "Bulksign Test",
+			Email         = "contact@bulksign.com",
+			Index         = 1,
+			RecipientType = RecipientTypeApi.Signer
+		});
+
+		envelope.Documents.Add(new DocumentApiModel
+		{
+			Index    = 1,
+			FileName = "singlepage.pdf",
+			FileContentByteArray = new FileContentByteArray
 			{
-				Console.WriteLine("Please edit APiKeys.cs and put your own token/email");
-				return;
-			}
-
-			BulksignApiClient api = new BulksignApiClient();
-
-			BulksignResult<string[]> stamps = api.GetSignatureStamps(token);
-
-			//for this sample we require to define at least 1 signature stamp
-
-			if (stamps.Response.Length == 0)
+				ContentBytes = ConversionUtilities.ConvertToByteString( File.ReadAllBytes(Environment.CurrentDirectory + @"\Files\singlepage.pdf"))
+			},
+			NewSignatures =
 			{
-				Console.WriteLine("This sample requires to have at least 1 signature stamp. ");
-				return;
-			}
+				//see https://bulksign.com/docs/howdoi.htm#is-there-a-easy-way-to-determine-the-position-top-and-left-of-the-new-form-fields-on-the-page-
+				//about how to set the signature field at a fixed position
 
-			//load the imprints too
-			BulksignResult<string[]> imprints = api.GetSignatureImprints(token);
-
-
-			EnvelopeApiModel envelope = new EnvelopeApiModel();
-			envelope.EnvelopeType                    = EnvelopeTypeApi.Serial;
-			envelope.DaysUntilExpire                 = 10;
-			envelope.DisableSignerEmailNotifications = false;
-
-			envelope.Recipients = new[]
-			{
-				new RecipientApiModel
+				new NewSignatureApiModel
 				{
-					Name          = "Bulksign Test",
-					Email         = "contact@bulksign.com",
-					Index         = 1,
-					RecipientType = RecipientTypeApi.Signer
-				}
-			};
-
-			envelope.Documents = new[]
-			{
-				new DocumentApiModel
+					//width,height, left and top values are in pixels
+					Height                   = 100,
+					Width                    = 250,
+					PageIndex                = 1,
+					Left                     = 20,
+					Top                      = 30,
+					SignatureType            = SignatureTypeApi.Stamp,
+					AssignedToRecipientEmail = envelope.Recipients[0].Email,
+					StampSignatureConfiguration = new StampSignatureConfigurationApiModel
+					{
+						//user must upload the signature image
+						StampType = StampSignatureTypeApi.UserProvided
+					}
+				},
+				new NewSignatureApiModel
 				{
-					Index    = 1,
-					FileName = "singlepage.pdf",
-					FileContentByteArray = new FileContentByteArray
+					Height                   = 100,
+					Width                    = 250,
+					PageIndex                = 1,
+					Left                     = 20,
+					Top                      = 70,
+					SignatureType            = SignatureTypeApi.Stamp,
+					AssignedToRecipientEmail = envelope.Recipients[0].Email,
+					StampSignatureConfiguration = new StampSignatureConfigurationApiModel
 					{
-						ContentBytes = File.ReadAllBytes(Environment.CurrentDirectory + @"\Files\singlepage.pdf")
-					},
-					NewSignatures = new[]
-					{
-						//see https://bulksign.com/docs/howdoi.htm#is-there-a-easy-way-to-determine-the-position-top-and-left-of-the-new-form-fields-on-the-page-
-						//about how to set the signature field at a fixed position
+						//user must upload the signature image
+						StampType = StampSignatureTypeApi.PredefinedStamp,
 
-						new NewSignatureApiModel
-						{
-							//width,height, left and top values are in pixels
-							Height                   = 100,
-							Width                    = 250,
-							PageIndex                = 1,
-							Left                     = 20,
-							Top                      = 30,
-							SignatureType            = SignatureTypeApi.Stamp,
-							AssignedToRecipientEmail = envelope.Recipients[0].Email,
-							StampSignatureConfiguration = new StampSignatureConfigurationApiModel
-							{
-								//user must upload the signature image
-								StampType = StampSignatureTypeApi.UserProvided
-							}
-						},
-						new NewSignatureApiModel
-						{
-							Height                   = 100,
-							Width                    = 250,
-							PageIndex                = 1,
-							Left                     = 20,
-							Top                      = 70,
-							SignatureType            = SignatureTypeApi.Stamp,
-							AssignedToRecipientEmail = envelope.Recipients[0].Email,
-							StampSignatureConfiguration = new StampSignatureConfigurationApiModel
-							{
-								//user must upload the signature image
-								StampType = StampSignatureTypeApi.PredefinedStamp,
+						//we'll use the first stamp defined in the organization
+						StampName = stamps.Result.FirstOrDefault(),
 
-								//we'll use the first stamp defined in the organization
-								StampName = stamps.Response.FirstOrDefault(),
-
-								//apply an imprint too for this signature
-								ImprintName = imprints.Response.FirstOrDefault()
-
-							}
-						}
+						//apply an imprint too for this signature
+						ImprintName = imprints.Result.FirstOrDefault()
 					}
 				}
-			};
+			}
+		});
 
-			BulksignResult<SendEnvelopeResultApiModel> result = api.SendEnvelope(token,envelope);
+		try
+		{
+
+			SendEnvelopeResult result = client.SendEnvelope(envelope);
 
 			if (result.IsSuccessful)
 			{
-				Console.WriteLine("Access code for recipient " + result.Response.RecipientAccess[0].RecipientEmail + " is " + result.Response.RecipientAccess[0].AccessCode);
-				Console.WriteLine("EnvelopeId is : " + result.Response.EnvelopeId);
+				Console.WriteLine("Access code for recipient " + result.Result.RecipientAccess[0].RecipientEmail + " is " + result.Result.RecipientAccess[0].AccessCode);
+				Console.WriteLine("EnvelopeId is : " + result.Result.EnvelopeId);
 			}
 			else
 			{
 				Console.WriteLine("ERROR : " + result.ErrorCode + " " + result.ErrorMessage);
 			}
+		}
+		catch (Exception ex)
+		{
+			//handle failed request
+			Console.WriteLine(ex.Message);
 		}
 	}
 }

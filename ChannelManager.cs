@@ -5,6 +5,7 @@ namespace GrpcApiSamples;
 
 public class ChannelManager
 {
+	//single channel reused for ALL requests, see https://grpc.io/docs/guides/performance/
 	private static GrpcChannel channel;
 
 	//update this to point to the Bulksign GRPC API endpoint

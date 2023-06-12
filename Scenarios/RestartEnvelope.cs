@@ -1,5 +1,5 @@
-using System;
 using Bulksign.Api;
+using GrpcApiSamples;
 
 namespace Bulksign.ApiSamples
 {
@@ -18,17 +18,29 @@ namespace Bulksign.ApiSamples
 				return;
 			}
 
-			BulksignApiClient api = new BulksignApiClient();
-
-			BulksignResult<string> result = api.RestartEnvelope(token,EXPIRED_ENVELOPE_ID);
-
-			if (result.IsSuccessful)
+			EnvelopeIdInput id = new EnvelopeIdInput()
 			{
-				Console.WriteLine("Envelope was successfully restarted");
+				Authentication = token,
+				EnvelopeId     = EXPIRED_ENVELOPE_ID
+			};
+
+			try
+			{
+				EmptyResult result = ChannelManager.GetClient().RestartEnvelope(id);
+
+				if (result.IsSuccessful)
+				{
+					Console.WriteLine("Envelope was successfully restarted");
+				}
+				else
+				{
+					Console.WriteLine("ERROR : " + result.ErrorCode + " " + result.ErrorMessage);
+				}
 			}
-			else
+			catch (Exception ex)
 			{
-				Console.WriteLine("ERROR : " + result.ErrorCode + " " + result.ErrorMessage);
+				//handle failed request
+				Console.WriteLine(ex.Message);
 			}
 		}
 	}

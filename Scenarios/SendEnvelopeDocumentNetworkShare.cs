@@ -1,70 +1,73 @@
-﻿using System;
-using Bulksign.Api;
+﻿using Bulksign.Api;
+using GrpcApiSamples;
 
-namespace Bulksign.ApiSamples
+namespace Bulksign.ApiSamples;
+
+public class SendEnvelopeDocumentNetworkShare
 {
-	public class SendEnvelopeDocumentNetworkShare
+
+	public void RunSample()
 	{
+		AuthenticationApiModel token = new ApiKeys().GetAuthentication();
 
-		public void RunSample()
+		if (string.IsNullOrEmpty(token.Key))
 		{
-			BulksignApiClient api = new BulksignApiClient();
+			Console.WriteLine("Please edit ApiKeys.cs and put your own token/email");
+			return;
+		}
 
+		EnvelopeApiModelInput envelope = new EnvelopeApiModelInput();
+		envelope.Authentication = token;
+		envelope.EnvelopeType   = EnvelopeTypeApi.Serial;
 
-			AuthenticationApiModel token = new ApiKeys().GetAuthentication();
+		envelope.Recipients.Add(new RecipientApiModel()
+		{
+			Email         = "test@test.com",
+			Index         = 1,
+			Name          = "Test",
+			RecipientType = RecipientTypeApi.Signer
+		});
 
-			if (string.IsNullOrEmpty(token.Key))
+		//NOTE : specifying as document input a network path ONLY works on the on-premise version of Bulksign
+		envelope.Documents.AddRange(new[]
+		{
+			new DocumentApiModel()
 			{
-				Console.WriteLine("Please edit ApiKeys.cs and put your own token/email");
-				return;
-			}
-
-			EnvelopeApiModel envelope = new EnvelopeApiModel();
-			envelope.EnvelopeType = EnvelopeTypeApi.Serial;
-
-			envelope.Recipients = new[]
-			{
-				new RecipientApiModel()
+				FileNetworkShare = new FileNetworkShare()
 				{
-					Email = "test@test.com",
-					Index = 1,
-					Name = "Test",
-					RecipientType = RecipientTypeApi.Signer
+					Path = @"\\DocumentShare\\mydocument.pdf"
 				}
-			};
-
-			//NOTE : this oly works on the on-premise version
-			envelope.Documents = new []
+			},
+			new DocumentApiModel()
 			{
-				new DocumentApiModel()
+				FileNetworkShare = new FileNetworkShare()
 				{
-					FileNetworkShare = new FileNetworkShare()
-					{
-						Path = @"\\DocumentShare\\mydocument.pdf"
-					}
-				},
-				new DocumentApiModel()
-				{
-					FileNetworkShare = new FileNetworkShare()
-					{
-						Path = @"\\DocumentShare\\other.pdf"
-					}
-				},
-			};
+					Path = @"\\DocumentShare\\other.pdf"
+				}
+			}
+		});
 
-			BulksignResult<SendEnvelopeResultApiModel> result = api.SendEnvelope(token, envelope);
+		try
+		{
+			SendEnvelopeResult result = ChannelManager.GetClient().SendEnvelope(envelope);
 
 			if (result.IsSuccessful)
 			{
-				Console.WriteLine("Access code for recipient " + result.Response.RecipientAccess[0].RecipientEmail + " is " + result.Response.RecipientAccess[0].AccessCode);
-				Console.WriteLine("Envelope id is : " + result.Response.EnvelopeId);
+				Console.WriteLine("Access code for recipient " + result.Result.RecipientAccess[0].RecipientEmail + " is " + result.Result.RecipientAccess[0].AccessCode);
+				Console.WriteLine("Envelope id is : " + result.Result.EnvelopeId);
 			}
 			else
 			{
-				Console.WriteLine($"Request failed : ErrorCode '{result.ErrorCode}' , Message {result.ErrorMessage}" );
+				Console.WriteLine($"Request failed : ErrorCode '{result.ErrorCode}' , Message {result.ErrorMessage}");
 			}
-
+		}
+		catch (Exception ex)
+		{
+			//handle failed request
+			Console.WriteLine(ex.Message);
 		}
 
 	}
+
 }
+
