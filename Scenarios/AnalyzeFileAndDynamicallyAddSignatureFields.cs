@@ -12,11 +12,11 @@ public class AnalyzeFileAndDynamicallyAddSignatureFields
 
 	public void RunSample()
 	{
-		AuthenticationApiModel token = new ApiKeys().GetAuthentication();
+		AuthenticationApiModel token = new Authentication().GetAuthenticationModel();
 
 		if (string.IsNullOrEmpty(token.Key))
 		{
-			Console.WriteLine("Please edit ApiKeys.cs and put your own token/email");
+			Console.WriteLine("Please edit Authentication.cs and set your own API key there");
 			return;
 		}
 

@@ -5,64 +5,64 @@ namespace Bulksign.ApiSamples;
 
 public class AddRecipientsAndDocumentsToExistingDraft
 {
-		public void RunSample()
+	public void RunSample()
+	{
+		//set your existing draftId here for which you want to make these changes
+		string existingDraftId = "..........";
+
+		AuthenticationApiModel token = new Authentication().GetAuthenticationModel();
+
+		if (string.IsNullOrEmpty(token.Key))
 		{
-			//set your existing draftId here for which you want to make these changes
-			string existingDraftId = "..........";
+			Console.WriteLine("Please edit Authentication.cs and set your own API key there");
+			return;
+		}
 
-			AuthenticationApiModel token = new ApiKeys().GetAuthentication();
+		AddDocumentsOrRecipientsToDraftApiModelInput model = new AddDocumentsOrRecipientsToDraftApiModelInput();
 
-			if (string.IsNullOrEmpty(token.Key))
+		model.Authentication = token;
+		model.DraftId = existingDraftId;
+
+		//add a new signer recipient to the draft
+		model.Recipients.Add(new RecipientApiModel()
 			{
-				Console.WriteLine("Please edit APiKeys.cs and put your own token/email");
-				return;
+				Email = "test.recipient@test.com",
+				Name = "Recipient Name",
+				Index = 3,
+				RecipientType = RecipientTypeApi.Signer
 			}
+		);
 
-			AddDocumentsOrRecipientsToDraftApiModelInput model = new AddDocumentsOrRecipientsToDraftApiModelInput();
-
-			model.Authentication = token;
-			model.DraftId = existingDraftId;
-			
-			//add a new signer recipient to the draft
-			model.Recipients.Add(new RecipientApiModel()
-				{
-					Email = "test.recipient@test.com",
-					Name = "Recipient Name",
-					Index = 3,
-					RecipientType = RecipientTypeApi.Signer
-				}
-			);
-		
-			//add a new PDF document to the draft
-			model.Documents.Add(new DocumentApiModel() 
-				{
-						Index = 1,
-						FileName = "myfile.pdf",
-						FileContentByteArray = new FileContentByteArray()
-						{
-							ContentBytes = ConversionUtilities.ConvertToByteString( File.ReadAllBytes(Environment.CurrentDirectory + @"\Files\bulksign_test_Sample.pdf"))
-						}
-					}
-			);
-
-
-			try
+		//add a new PDF document to the draft
+		model.Documents.Add(new DocumentApiModel()
 			{
-				EmptyResult result = ChannelManager.GetClient().AddDocumentsRecipientsToDraft(model);
-
-				if (result.IsSuccessful)
+				Index = 1,
+				FileName = "myfile.pdf",
+				FileContentByteArray = new FileContentByteArray()
 				{
-					Console.WriteLine("Draft was successfully updated");
-				}
-				else
-				{
-					Console.WriteLine("ERROR : " + result.ErrorCode + " " + result.ErrorMessage);
+					ContentBytes = ConversionUtilities.ConvertToByteString(File.ReadAllBytes(Environment.CurrentDirectory + @"\Files\bulksign_test_Sample.pdf"))
 				}
 			}
-			catch (Exception ex)
+		);
+
+
+		try
+		{
+			EmptyResult result = ChannelManager.GetClient().AddDocumentsRecipientsToDraft(model);
+
+			if (result.IsSuccessful)
 			{
-				//handle failed request
-				Console.WriteLine(ex.Message);
+				Console.WriteLine("Draft was successfully updated");
+			}
+			else
+			{
+				Console.WriteLine("ERROR : " + result.ErrorCode + " " + result.ErrorMessage);
 			}
 		}
+		catch (Exception ex)
+		{
+			//handle failed request
+			Console.WriteLine(ex.Message);
+		}
+	}
 }

@@ -15,7 +15,7 @@ public class ChannelManager
 	{
 		if (channel == null)
 		{
-			channel = GrpcChannel.ForAddress("");
+			channel = GrpcChannel.ForAddress(ENDPOINT_URL);
 		}
 
 		return new GrpcApi.GrpcApiClient(channel);

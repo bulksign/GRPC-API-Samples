@@ -7,11 +7,11 @@ public class CustomDocumentAccess
 {
 	public void RunSample()
 	{
-		AuthenticationApiModel token = new ApiKeys().GetAuthentication();
+		AuthenticationApiModel token = new Authentication().GetAuthenticationModel();
 
 		if (string.IsNullOrEmpty(token.Key))
 		{
-			Console.WriteLine("Please edit APiKeys.cs and put your own token/email");
+			Console.WriteLine("Please edit Authentication.cs and set your own API key there");
 			return;
 		}
 
@@ -50,8 +50,7 @@ public class CustomDocumentAccess
 				FileName = "bulksign_test_Sample.pdf",
 				FileContentByteArray = new FileContentByteArray()
 				{
-					ContentBytes = ConversionUtilities.ConvertToByteString(
-						File.ReadAllBytes(Environment.CurrentDirectory + @"\Files\bulksign_test_Sample.pdf"))
+					ContentBytes = ConversionUtilities.ConvertToByteString(File.ReadAllBytes(Environment.CurrentDirectory + @"\Files\bulksign_test_Sample.pdf"))
 				}
 			},
 			new DocumentApiModel()
@@ -60,9 +59,7 @@ public class CustomDocumentAccess
 				FileName = "forms.pdf",
 				FileContentByteArray = new FileContentByteArray()
 				{
-					ContentBytes =
-						ConversionUtilities.ConvertToByteString(
-							File.ReadAllBytes(Environment.CurrentDirectory + @"\Files\forms.pdf"))
+					ContentBytes = ConversionUtilities.ConvertToByteString(File.ReadAllBytes(Environment.CurrentDirectory + @"\Files\forms.pdf"))
 				}
 			}
 		});

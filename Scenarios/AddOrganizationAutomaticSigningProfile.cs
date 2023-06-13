@@ -5,46 +5,46 @@ namespace Bulksign.ApiSamples;
 
 public class AddOrganizationAutomaticSigningProfile
 {
-		public void RunSample()
+	public void RunSample()
+	{
+		AuthenticationApiModel token = new Authentication().GetAuthenticationModel();
+
+		if (string.IsNullOrEmpty(token.Key))
 		{
-			AuthenticationApiModel token = new ApiKeys().GetAuthentication();
+			Console.WriteLine("Please edit Authentication.cs and set your own API key there");
+			return;
+		}
 
-			if (string.IsNullOrEmpty(token.Key))
+		AutomaticSigningProfileApiModelInput newProfile = new AutomaticSigningProfileApiModelInput();
+		newProfile.Name = "My Profile";
+
+		//we'll use the default organization certificate 
+		newProfile.CertificateTypeApi = AutomaticSigningProfileCertificateTypeApi.Default;
+
+		//set the base64 encoded signature image here
+		newProfile.SignatureImageBase64 = "...............";
+
+		//if we want to use a specific imprint for the signature, we have to set the name here
+		//you can call GetSignatureImprints here, see sample from SigningImprints.cs
+		newProfile.SignatureImprintName = "";
+
+		try
+		{
+			EmptyResult result = ChannelManager.GetClient().AddOrganizationAutomaticSigningProfile(newProfile);
+
+			if (result.IsSuccessful)
 			{
-				Console.WriteLine("Please edit APiKeys.cs and put your own token/email");
-				return;
+				Console.WriteLine($"Signing profile was successfully created ");
 			}
-
-			AutomaticSigningProfileApiModelInput newProfile = new AutomaticSigningProfileApiModelInput();
-			newProfile.Name = "My Profile";
-
-			//we'll use the default organization certificate 
-			newProfile.CertificateTypeApi = AutomaticSigningProfileCertificateTypeApi.Default;
-			
-			//set the base64 encoded signature image here
-			newProfile.SignatureImageBase64 = "...............";
-
-			//if we want to use a specific imprint for the signature, we have to set the name here
-			//you can call GetSignatureImprints here, see sample from SigningImprints.cs
-			newProfile.SignatureImprintName = "";
-
-			try
+			else
 			{
-				EmptyResult result = ChannelManager.GetClient().AddOrganizationAutomaticSigningProfile(newProfile);
-
-				if (result.IsSuccessful)
-				{
-					Console.WriteLine($"Signing profile was successfully created ");
-				}
-				else
-				{
-					Console.WriteLine("ERROR : " + result.ErrorCode + " " + result.ErrorMessage);
-				}
-			}
-			catch (Exception ex)
-			{
-				//handle failed request here
-				Console.WriteLine(ex.Message);
+				Console.WriteLine("ERROR : " + result.ErrorCode + " " + result.ErrorMessage);
 			}
 		}
+		catch (Exception ex)
+		{
+			//handle failed request here
+			Console.WriteLine(ex.Message);
+		}
+	}
 }
