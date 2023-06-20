@@ -146,6 +146,8 @@ service GrpcApi
    rpc GetCustomUserRoles(AuthenticationApiModel) returns (GetCustomUserRolesResult);
 
    rpc GetUserDetails(AuthenticationApiModel) returns (GetUserDetailsResult);
+
+   rpc UpdateUserSettings(UserUpdateSettingsApiModelInput) returns(EmptyResult);
 }
 
 
@@ -454,7 +456,7 @@ message OrganizationSigningSettingsApiModel
 message EmailTemplateApiModelInput
 {
 	AuthenticationApiModel Authentication = 3;
-	string Langguage =4;
+	string Language =4;
 	repeated  EmailTemplateDescriptorApiModel Templates = 5;
 }
 	
@@ -548,11 +550,6 @@ message  FieldAssignmentApiModel
 {
 	string FieldId =1;
 	bool IsRequired =2;
-}
-
-message InputValidationApiModel
-{
-
 }
 
 message SignatureAssignmentApiModel
@@ -1730,4 +1727,72 @@ message GetUserDetailsResult
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	UserDetailsApiModel Result=5;
+}
+
+
+message UserUpdateSettingsApiModelInput
+{
+	AuthenticationApiModel Authentication = 1;
+	string FirstName=2;
+	string LastName=3;
+	string TimezoneIdentifier=4;
+	string UserInterfaceLanguage=5;
+	string PhoneNumber=6;
+	string JobTitle=7;
+	string DefaultDraftLanguage=8;
+	NullableBoolean  DefaultForSendFinishedDocumentsToAllSigners=9;
+	NullableBoolean DefaultForEnableBatchSigning=10;
+	NullableBoolean DefaultForAllowRecipientDelegation=11;
+	NullableBoolean DefaultForPreventFormFieldEditOnEnvelopeCompletion=12;
+	NullableBoolean NotificationRecipientOpenedSignStep=13;
+	NullableBoolean NotificationRecipientSigned=14;
+	NullableBoolean NotificationEnvelopeCompleted=15;
+	NullableBoolean NotificationRecipientRejected=16;
+	string SignatureImageBase64=17;
+	string UserPictureBase64=18;
+}
+
+
+message RegexValidationApiModel
+{
+	string Regex=1;
+}
+
+message DateValidationApiModel
+{
+	 string DateFormat=1;
+}
+
+message NumericRangeApiModel
+{
+	string From=1;
+    string To=2;
+}
+
+message NumberValidationApiModel
+{
+	bool AllowFloatingPointNumbers=1;
+	string DecimalSeparator=2;
+	NumericRangeApiModel Range=3;
+}
+
+enum TextInputValidationTypeApi
+{
+	NO_TextInputValidationTypeApi=0;
+	PhoneNumber = 1;
+	EmailAddress = 2;
+	Time = 3;
+	Regex = 4;
+	Date = 5;
+	Number = 6;
+}
+
+message InputValidationApiModel
+{
+	TextInputValidationTypeApi ValidationType=1;
+	string Tooltip=2;
+	string Placeholder=3;
+	RegexValidationApiModel RegexValidation=4;
+	DateValidationApiModel DateValidation=5;
+	NumberValidationApiModel NumberValidation=6;
 }

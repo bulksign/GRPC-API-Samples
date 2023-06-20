@@ -75,7 +75,7 @@ public class OnboardNewOrganization
 		client.AddEmailTemplate(new EmailTemplateApiModelInput()
 		{
 			Authentication = newOrgToken,
-			Langguage = language,
+			Language = language,
 			Templates = { 	
 				new EmailTemplateDescriptorApiModel()
 				{
