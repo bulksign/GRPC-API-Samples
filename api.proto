@@ -115,6 +115,8 @@ service GrpcApi
 
    rpc DownloadEnvelopeIncompleteDocuments(EnvelopeIdInput) returns (DownloadEnvelopeIncompleteDocumentsResult);
 
+   rpc DownloadEnvelopeCompletedAttachments(EnvelopeIdInput) returns (DownloadEnvelopeCompletedAttachmentsResult);
+
    rpc GetEnvelopesToSign(AuthenticationApiModel) returns(GetEnvelopesToSignResult);
 
    rpc DeleteEnvelope(EnvelopeIdInput) returns (EmptyResult);
@@ -148,6 +150,8 @@ service GrpcApi
    rpc GetUserDetails(AuthenticationApiModel) returns (GetUserDetailsResult);
 
    rpc UpdateUserSettings(UserUpdateSettingsApiModelInput) returns(EmptyResult);
+
+   rpc ResetSignatureType(ResetSignatureTypeApiModelInput) returns(NumericResult);
 }
 
 
@@ -1495,6 +1499,15 @@ message DownloadEnvelopeCompletedDocumentsResult
 	bytes Result=5;
 }
 
+message DownloadEnvelopeCompletedAttachmentsResult
+{
+	string ErrorMessage = 1;
+	bool IsSuccessful = 2;
+	int32 ErrorCode = 3;
+	string RequestId = 4;
+	bytes Result=5;
+}
+
 
 message DownloadEnvelopeIncompleteDocumentsResult
 {
@@ -1577,6 +1590,14 @@ enum AutomaticSigningProfileCertificateTypeApi
 	Default = 1;
 	StoredInProfile = 2;
 	RemoteSigningProvider = 3;
+}
+
+
+enum ResetSignatureType
+{
+	ResetSignatureType_DrawTypeToSign = 0;
+	ResetSignatureType_ClickToSign = 1;
+	ResetSignatureType_LocalCertificate = 3;
 }
 
 
@@ -1795,4 +1816,14 @@ message InputValidationApiModel
 	RegexValidationApiModel RegexValidation=4;
 	DateValidationApiModel DateValidation=5;
 	NumberValidationApiModel NumberValidation=6;
+}
+
+message ResetSignatureTypeApiModelInput
+{
+	AuthenticationApiModel Authentication = 1;
+	string EnvelopeId =2;
+	FindRecipientByIndexApiModel ByIndex=3;
+	FindRecipientByEmailApiModel ByEmail=4;
+	FindRecipientByIdentifierApiModel ByIdentifier=5;
+	ResetSignatureType SignatureType=6;
 }
