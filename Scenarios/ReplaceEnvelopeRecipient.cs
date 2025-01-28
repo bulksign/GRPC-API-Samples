@@ -1,4 +1,4 @@
-using Bulksign.Api;
+using BulksignGrpc;
 using GrpcApiSamples;
 
 namespace Bulksign.ApiSamples;
@@ -46,7 +46,7 @@ public class ReplaceEnvelopeRecipientSample
 		{
 			EmptyResult result = ChannelManager.GetClient().ReplaceEnvelopeRecipient(re);
 
-			if (result.IsSuccessful)
+			if (result.IsSuccess)
 			{
 				Console.WriteLine("Recipient has been successfully replaced");
 			}

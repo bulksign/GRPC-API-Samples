@@ -1,5 +1,4 @@
-﻿using System;
-using Bulksign.Api;
+﻿using BulksignGrpc;
 using GrpcApiSamples;
 
 namespace Bulksign.ApiSamples;
@@ -34,7 +33,7 @@ public class GetCompletedFormFields
 			return;
 		}
 
-		if (!result.IsSuccessful)
+		if (!result.IsSuccess)
 		{
 			Console.WriteLine($"The request failed, error code :  {result.ErrorCode}, message : {result.ErrorMessage}");
 			return;

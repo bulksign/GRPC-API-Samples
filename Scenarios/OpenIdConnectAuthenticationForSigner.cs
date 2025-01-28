@@ -1,4 +1,4 @@
-﻿using Bulksign.Api;
+﻿using BulksignGrpc;
 using GrpcApiSamples;
 
 namespace Bulksign.ApiSamples;
@@ -20,7 +20,7 @@ public class OpenIdConnectAuthenticationForSigner
 		//Obviously you need to define at least 1 provider for this to work
 		GetAuthenticationProvidersResult providers = ChannelManager.GetClient().GetAuthenticationProviders(token);
 
-		if (providers.IsSuccessful == false)
+		if (providers.IsSuccess == false)
 		{
 			return;
 		}
@@ -34,9 +34,7 @@ public class OpenIdConnectAuthenticationForSigner
 		EnvelopeApiModelInput envelope = new EnvelopeApiModelInput();
 		envelope.Authentication = token;
 		envelope.EnvelopeType = EnvelopeTypeApi.Serial;
-		envelope.DaysUntilExpire = 10;
-		envelope.EmailMessage = "Please sign this document";
-		envelope.EmailSubject = "Please Bulksign this document";
+		envelope.ExpirationDays = 10;
 		envelope.Name = "Test envelope";
 
 		envelope.Recipients.Add(new RecipientApiModel
@@ -73,7 +71,7 @@ public class OpenIdConnectAuthenticationForSigner
 
 		SendEnvelopeResult result = ChannelManager.GetClient().SendEnvelope(envelope);
 
-		if (result.IsSuccessful)
+		if (result.IsSuccess)
 		{
 			Console.WriteLine("Access code for recipient " + result.Result.RecipientAccess[0].RecipientEmail + " is " + result.Result.RecipientAccess[0].AccessCode);
 			Console.WriteLine("Envelope id is : " + result.Result.EnvelopeId);

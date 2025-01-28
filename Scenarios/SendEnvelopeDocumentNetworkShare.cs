@@ -1,4 +1,4 @@
-﻿using Bulksign.Api;
+﻿using BulksignGrpc;
 using GrpcApiSamples;
 
 namespace Bulksign.ApiSamples;
@@ -51,7 +51,7 @@ public class SendEnvelopeDocumentNetworkShare
 		{
 			SendEnvelopeResult result = ChannelManager.GetClient().SendEnvelope(envelope);
 
-			if (result.IsSuccessful)
+			if (result.IsSuccess)
 			{
 				Console.WriteLine("Access code for recipient " + result.Result.RecipientAccess[0].RecipientEmail + " is " + result.Result.RecipientAccess[0].AccessCode);
 				Console.WriteLine("Envelope id is : " + result.Result.EnvelopeId);

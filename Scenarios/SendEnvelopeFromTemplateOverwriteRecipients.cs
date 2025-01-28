@@ -1,4 +1,4 @@
-﻿using Bulksign.Api;
+﻿using BulksignGrpc;
 using GrpcApiSamples;
 
 namespace Bulksign.ApiSamples;
@@ -56,7 +56,7 @@ public class SendEnvelopeFromTemplateOverwriteRecipients
 
 			SendEnvelopeFromTemplateResult result = ChannelManager.GetClient().SendEnvelopeFromTemplate(model);
 
-			if (result.IsSuccessful)
+			if (result.IsSuccess)
 			{
 				Console.WriteLine("Access code for recipient " + result.Result.RecipientAccess[0].RecipientEmail + " is " + result.Result.RecipientAccess[0].AccessCode);
 				Console.WriteLine("EnvelopeId is : " + result.Result.EnvelopeId);

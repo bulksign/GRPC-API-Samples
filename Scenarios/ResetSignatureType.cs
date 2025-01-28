@@ -1,4 +1,6 @@
-﻿using Bulksign.Api;
+﻿
+using BulksignGrpc;
+using Google.Protobuf.WellKnownTypes;
 using GrpcApiSamples;
 
 namespace Bulksign.ApiSamples;
@@ -25,7 +27,7 @@ public class ResetSignatureType
 				EnvelopeId = "your_envelope_id",
 
 				//the new type of signature which will be assigned to the recipient
-				SignatureType = Api.ResetSignatureType.ClickToSign,
+				SignatureType = BulksignGrpc.ResetSignatureType.ClickToSign,
 
 				//we'll specify the recipient by the index (in this sample being the first recipient)
 				ByIndex = new FindRecipientByIndexApiModel()
@@ -36,7 +38,7 @@ public class ResetSignatureType
 
 			NumericResult result = ChannelManager.GetClient().ResetSignatureType(model);
 
-			if (result.IsSuccessful)
+			if (result.IsSuccess)
 			{
 				Console.WriteLine($"{result.Result} signature fields were changed");
 			}

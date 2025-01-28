@@ -1,4 +1,4 @@
-﻿using Bulksign.Api;
+﻿using BulksignGrpc;
 using GrpcApiSamples;
 
 namespace Bulksign.ApiSamples;
@@ -28,7 +28,7 @@ public class AddUserContact
 			{
 				EmptyResult result = ChannelManager.GetClient().AddContact(contact);
 
-				if (result.IsSuccessful)
+				if (result.IsSuccess)
 				{
 					Console.WriteLine("Contact was successfully added");
 				}

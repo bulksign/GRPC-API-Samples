@@ -1,4 +1,5 @@
-﻿using Bulksign.Api;
+﻿
+using BulksignGrpc;
 using GrpcApiSamples;
 
 namespace Bulksign.ApiSamples;
@@ -50,7 +51,7 @@ public class AddRecipientsAndDocumentsToExistingDraft
 		{
 			EmptyResult result = ChannelManager.GetClient().AddDocumentsRecipientsToDraft(model);
 
-			if (result.IsSuccessful)
+			if (result.IsSuccess)
 			{
 				Console.WriteLine("Draft was successfully updated");
 			}

@@ -1,4 +1,5 @@
-﻿using Bulksign.Api;
+﻿
+using BulksignGrpc;
 using GrpcApiSamples;
 
 namespace Bulksign.ApiSamples
@@ -25,7 +26,7 @@ namespace Bulksign.ApiSamples
 			{
 				SearchTeamMembersDraftsResult result = ChannelManager.GetClient().SearchTeamMembersDrafts(search);
 
-				if (result.IsSuccessful)
+				if (result.IsSuccess)
 				{
 					Console.WriteLine($"Found {result.Result.Count} team member drafts");
 				}

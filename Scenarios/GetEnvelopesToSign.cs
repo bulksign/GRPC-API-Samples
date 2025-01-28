@@ -1,4 +1,4 @@
-﻿using Bulksign.Api;
+﻿using BulksignGrpc;
 using GrpcApiSamples;
 
 namespace Bulksign.ApiSamples;
@@ -19,7 +19,7 @@ public class GetEnvelopesToSign
 		{
 			GetEnvelopesToSignResult result = ChannelManager.GetClient().GetEnvelopesToSign(token);
 
-			if (result.IsSuccessful)
+			if (result.IsSuccess)
 			{
 				Console.WriteLine($"Found {result.Result.Count} envelopes to sign");
 			}
@@ -31,7 +31,7 @@ public class GetEnvelopesToSign
 		catch (Exception ex)
 		{
 			//handle failed request
-            Console.WriteLine(ex.Message);
+			Console.WriteLine(ex.Message);
 		}
 	}
 }

@@ -1,5 +1,5 @@
 ﻿using System;
-using Bulksign.Api;
+using BulksignGrpc;
 using GrpcApiSamples;
 
 namespace Bulksign.ApiSamples;
@@ -20,7 +20,7 @@ public class AuthenticationProviders
 		{
 			GetAuthenticationProvidersResult result = ChannelManager.GetClient().GetAuthenticationProviders(token);
 
-			if (result.IsSuccessful)
+			if (result.IsSuccess)
 			{
 				Console.WriteLine($"Found {result.Result.Count} authentication providers");
 			}

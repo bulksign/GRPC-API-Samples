@@ -1,6 +1,6 @@
 
 
-using Bulksign.Api;
+using BulksignGrpc;
 
 namespace Bulksign.ApiSamples;
 

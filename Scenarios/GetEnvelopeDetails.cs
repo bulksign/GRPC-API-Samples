@@ -1,4 +1,4 @@
-using Bulksign.Api;
+using BulksignGrpc;
 using GrpcApiSamples;
 
 namespace Bulksign.ApiSamples;
@@ -25,7 +25,7 @@ public class GetEnvelopeDetailsSample
 		{
 			GetEnvelopeDetailsResult result = ChannelManager.GetClient().GetEnvelopeDetails(id);
 
-			if (result.IsSuccessful)
+			if (result.IsSuccess)
 			{
 				Console.WriteLine($"Envelope '{id.EnvelopeId}' has name : '{result.Result.Name}' ");
 			}

@@ -1,4 +1,5 @@
-﻿using Bulksign.Api;
+﻿
+using BulksignGrpc;
 using GrpcApiSamples;
 
 namespace Bulksign.ApiSamples;
@@ -19,13 +20,11 @@ public class DisableEmailNotifications
 		EnvelopeApiModelInput envelope = new EnvelopeApiModelInput();
 		envelope.Authentication = token;
 		envelope.EnvelopeType = EnvelopeTypeApi.Serial;
-		envelope.DaysUntilExpire = 10;
-		envelope.EmailMessage = "Please sign this document";
-		envelope.EmailSubject = "Please Bulksign this document";
+		envelope.ExpirationDays = 10;
 		envelope.Name = "Test envelope";
 
 		//this will disable notifications for this envelope
-		envelope.DisableSignerEmailNotifications = true;
+		envelope.DisableRecipientNotifications = true;
 
 		envelope.Recipients.Add(new RecipientApiModel()
 			{
@@ -51,7 +50,7 @@ public class DisableEmailNotifications
 		{
 			SendEnvelopeResult result = ChannelManager.GetClient().SendEnvelope(envelope);
 
-			if (result.IsSuccessful)
+			if (result.IsSuccess)
 			{
 				Console.WriteLine("Access code for recipient " + result.Result.RecipientAccess[0].RecipientEmail + " is " + result.Result.RecipientAccess[0].AccessCode);
 				Console.WriteLine("Envelope id is : " + result.Result.EnvelopeId);

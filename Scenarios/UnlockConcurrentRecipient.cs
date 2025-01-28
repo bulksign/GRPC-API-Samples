@@ -1,4 +1,4 @@
-using Bulksign.Api;
+using BulksignGrpc;
 using GrpcApiSamples;
 
 namespace Bulksign.ApiSamples;
@@ -27,7 +27,7 @@ public class UnlockConcurrentRecipientSample
 		{
 			EmptyResult result = ChannelManager.GetClient().UnlockConcurrentRecipient(unlock);
 
-			if (result.IsSuccessful)
+			if (result.IsSuccess)
 			{
 				Console.WriteLine($"{unlock.EnvelopeId} was unlocked");
 			}

@@ -1,4 +1,4 @@
-﻿using Bulksign.Api;
+﻿using BulksignGrpc;
 using GrpcApiSamples;
 
 namespace Bulksign.ApiSamples;
@@ -32,7 +32,7 @@ public class AddOrganizationAutomaticSigningProfile
 		{
 			EmptyResult result = ChannelManager.GetClient().AddOrganizationAutomaticSigningProfile(newProfile);
 
-			if (result.IsSuccessful)
+			if (result.IsSuccess)
 			{
 				Console.WriteLine($"Signing profile was successfully created ");
 			}

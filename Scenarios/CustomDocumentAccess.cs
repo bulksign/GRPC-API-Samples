@@ -1,4 +1,6 @@
-using Bulksign.Api;
+
+using BulksignGrpc;
+using Google.Protobuf.Collections;
 using GrpcApiSamples;
 
 namespace Bulksign.ApiSamples;
@@ -17,14 +19,18 @@ public class CustomDocumentAccess
 
 		EnvelopeApiModelInput envelope = new EnvelopeApiModelInput();
 		envelope.Authentication = token;
-		envelope.EnvelopeType = EnvelopeTypeApi.Serial;
-		envelope.DaysUntilExpire = 10;
-		envelope.EmailMessage = "Please sign this document";
-		envelope.EmailSubject = "Please Bulksign this document";
-		envelope.Name = "Test envelope";
+		envelope.EnvelopeType   = EnvelopeTypeApi.Serial;
+		envelope.ExpirationDays = 10;
+		envelope.Messages.AddRange([
+			new MessageApiModel()
+			{
+				Message = "Please Bulksign this document",
+				Subject = "Please sign this document"
+			}
+		]);
+		envelope.Name           = "Test envelope";
 
-		envelope.Recipients.AddRange(new[]
-		{
+		envelope.Recipients.AddRange([
 			new RecipientApiModel()
 			{
 				Name = "Bulksign Test",
@@ -40,10 +46,9 @@ public class CustomDocumentAccess
 				Index = 1,
 				RecipientType = RecipientTypeApi.Signer
 			}
-		});
+		]);
 
-		envelope.Documents.AddRange(new[]
-		{
+		envelope.Documents.AddRange([
 			new DocumentApiModel()
 			{
 				Index = 1,
@@ -62,14 +67,13 @@ public class CustomDocumentAccess
 					ContentBytes = ConversionUtilities.ConvertToByteString(File.ReadAllBytes(Environment.CurrentDirectory + @"\Files\forms.pdf"))
 				}
 			}
-		});
+		]);
 
 		envelope.FileAccessMode = FileAccessModeTypeApi.Custom;
 
 		//assign different files to different recipients
 
-		envelope.CustomFileAccess.AddRange(new[]
-		{
+		envelope.CustomFileAccess.AddRange([
 			//assign first file to first recipient
 			new CustomFileAccessApiModel()
 			{
@@ -83,13 +87,13 @@ public class CustomDocumentAccess
 				RecipientEmail = envelope.Recipients[1].Email,
 				FileNames = { "forms.pdf" }
 			}
-		});
+		]);
 
 		try
 		{
 			SendEnvelopeResult result = ChannelManager.GetClient().SendEnvelope(envelope);
 
-			if (result.IsSuccessful)
+			if (result.IsSuccess)
 			{
 				Console.WriteLine("Access code for recipient " + result.Result.RecipientAccess[0].RecipientEmail + " is " + result.Result.RecipientAccess[0].AccessCode);
 				Console.WriteLine("Envelope id is : " + result.Result.EnvelopeId);

@@ -1,4 +1,5 @@
-﻿using Bulksign.Api;
+﻿
+using BulksignGrpc;
 using GrpcApiSamples;
 
 namespace Bulksign.ApiSamples;
@@ -19,7 +20,7 @@ public class GetSharedContacts
 		{
 			GetSharedContactsResult result = ChannelManager.GetClient().GetSharedContacts(token);
 
-			if (result.IsSuccessful)
+			if (result.IsSuccess)
 			{
 				Console.WriteLine($" {result.Result.Count} contacts found ");
 			}

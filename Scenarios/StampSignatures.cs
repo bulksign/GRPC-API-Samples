@@ -1,4 +1,4 @@
-using Bulksign.Api;
+using BulksignGrpc;
 using GrpcApiSamples;
 
 namespace Bulksign.ApiSamples;
@@ -31,7 +31,7 @@ public class StampSignatures
 			return;
 		}
 
-		if (!stamps.IsSuccessful)
+		if (!stamps.IsSuccess)
 		{
 			Console.WriteLine($"Request failed : ErrorCode '{stamps.ErrorCode}' , Message {stamps.ErrorMessage}");
 			return;
@@ -52,8 +52,8 @@ public class StampSignatures
 		EnvelopeApiModelInput envelope = new EnvelopeApiModelInput();
 		envelope.Authentication                  = token;
 		envelope.EnvelopeType                    = EnvelopeTypeApi.Serial;
-		envelope.DaysUntilExpire                 = 10;
-		envelope.DisableSignerEmailNotifications = false;
+		envelope.ExpirationDays                 = 10;
+		envelope.DisableRecipientNotifications = false;
 
 		envelope.Recipients.Add(new RecipientApiModel
 		{
@@ -121,7 +121,7 @@ public class StampSignatures
 
 			SendEnvelopeResult result = client.SendEnvelope(envelope);
 
-			if (result.IsSuccessful)
+			if (result.IsSuccess)
 			{
 				Console.WriteLine("Access code for recipient " + result.Result.RecipientAccess[0].RecipientEmail + " is " + result.Result.RecipientAccess[0].AccessCode);
 				Console.WriteLine("EnvelopeId is : " + result.Result.EnvelopeId);

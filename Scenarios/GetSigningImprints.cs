@@ -1,4 +1,4 @@
-﻿using Bulksign.Api;
+﻿using BulksignGrpc;
 using GrpcApiSamples;
 
 namespace Bulksign.ApiSamples;
@@ -19,7 +19,7 @@ public class GetSigningImprints
 		{
 			GetSignatureImprintsResult result = ChannelManager.GetClient().GetSignatureImprints(token);
 
-			if (result.IsSuccessful)
+			if (result.IsSuccess)
 			{
 				Console.WriteLine($"Found {result.Result.Count} signature imprints");
 			}

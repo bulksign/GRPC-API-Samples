@@ -1,4 +1,5 @@
-﻿using Bulksign.Api;
+﻿
+using BulksignGrpc;
 using GrpcApiSamples;
 
 namespace Bulksign.ApiSamples;
@@ -47,7 +48,7 @@ public class PrepareSendEnvelopeWithTags
 		}
 
 
-		if (!result.IsSuccessful)
+		if (!result.IsSuccess)
 		{
 			Console.WriteLine($"Request failed : ErrorCode '{result.ErrorCode}' , Message {result.ErrorMessage}");
 			return;
@@ -99,7 +100,7 @@ public class PrepareSendEnvelopeWithTags
 
 			SendEnvelopeResult rs = ChannelManager.GetClient().SendEnvelope(model);
 
-			if (rs.IsSuccessful)
+			if (rs.IsSuccess)
 			{
 				Console.WriteLine($"Envelope with id {rs.Result.EnvelopeId} was created");
 			}

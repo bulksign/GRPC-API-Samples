@@ -1,4 +1,4 @@
-﻿using Bulksign.Api;
+﻿using BulksignGrpc;
 using GrpcApiSamples;
 
 namespace Bulksign.ApiSamples;
@@ -21,7 +21,7 @@ public class GetUserDetails
 
 			GetUserDetailsResult result = ChannelManager.GetClient().GetUserDetails(token);
 
-			if (result.IsSuccessful == false)
+			if (result.IsSuccess == false)
 			{
 				Console.WriteLine($"Request failed : RequestId {result.RequestId}, ErrorCode '{result.ErrorCode}' , Message {result.ErrorMessage}");
 			}

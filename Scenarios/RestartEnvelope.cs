@@ -1,4 +1,5 @@
-using Bulksign.Api;
+
+using BulksignGrpc;
 using GrpcApiSamples;
 
 namespace Bulksign.ApiSamples
@@ -28,7 +29,7 @@ namespace Bulksign.ApiSamples
 			{
 				EmptyResult result = ChannelManager.GetClient().RestartEnvelope(id);
 
-				if (result.IsSuccessful)
+				if (result.IsSuccess)
 				{
 					Console.WriteLine("Envelope was successfully restarted");
 				}

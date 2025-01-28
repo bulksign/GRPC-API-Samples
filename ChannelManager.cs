@@ -1,4 +1,4 @@
-﻿using Bulksign.Api;
+﻿using BulksignGrpc;
 using Grpc.Net.Client;
 
 namespace GrpcApiSamples;

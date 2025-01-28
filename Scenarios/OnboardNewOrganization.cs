@@ -1,4 +1,4 @@
-﻿using Bulksign.Api;
+﻿using BulksignGrpc;
 using GrpcApiSamples;
 
 namespace Bulksign.ApiSamples;
@@ -30,7 +30,7 @@ public class OnboardNewOrganization
 			AdministratorPassword = "AdminPassword"
 		});
 
-		if (result.IsSuccessful == false)
+		if (result.IsSuccess == false)
 		{
 			Console.WriteLine($"Request failed, requestId {result.RequestId}, error {result.ErrorMessage} , code {result.ErrorCode}");
 		}

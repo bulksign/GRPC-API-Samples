@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option csharp_namespace = "Bulksign.Api";
+option csharp_namespace = "BulksignGrpc";
 
 import "google/protobuf/struct.proto";
 
@@ -152,20 +152,24 @@ service GrpcApi
    rpc UpdateUserSettings(UserUpdateSettingsApiModelInput) returns(EmptyResult);
 
    rpc ResetSignatureType(ResetSignatureTypeApiModelInput) returns(NumericResult);
+
+   rpc GetOrganizationSignGroups(AuthenticationApiModel) returns (GetOrganizationSignGroupsResult);
+
+   rpc GetCompletedAuditTrail(EnvelopeIdInput) returns (GetCompletedAuditTrailResult);
 }
 
 
 message NullableInt32 {
   oneof kind {
-    google.protobuf.NullValue Null = 1;
-    int32 Data = 2;
+	google.protobuf.NullValue Null = 1;
+	int32 Data = 2;
   }
 }
 
 message NullableBoolean {
   oneof kind {
-    google.protobuf.NullValue Null = 1;
-    bool Data = 2;
+	google.protobuf.NullValue Null = 1;
+	bool Data = 2;
   }
 }
 
@@ -192,7 +196,7 @@ message DraftIdInput
 message EmptyResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	string Result = 5;
@@ -201,7 +205,7 @@ message EmptyResult
 message IdentifierResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	string Result = 5;
@@ -211,7 +215,7 @@ message IdentifierResult
 message NumericResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	int32 Result = 5;
@@ -225,7 +229,7 @@ message EmptyInput
 
 message VersionResult
 {
-    string Version = 1;
+	string Version = 1;
 }
 
 message  AuthenticationApiModel
@@ -237,7 +241,7 @@ message  AuthenticationApiModel
 message GetAuthenticationProvidersResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	repeated AuthenticationProviderResultApiModel Result = 5;
@@ -259,7 +263,7 @@ message SearchTeamMembersEnvelopesInput
 message SearchTeamMembersEnvelopesResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	repeated ItemResultApiModel Result = 5;
@@ -276,7 +280,7 @@ message SearchDraftsInput
 message SearchDraftsResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	repeated ItemResultApiModel Result = 5;
@@ -293,7 +297,7 @@ message SearchTeamMembersDraftsInput
 message SearchTeamMembersDraftsResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	repeated ItemResultApiModel Result = 5;
@@ -309,7 +313,7 @@ message SearchTeamMembersTemplatesInput
 message SearchTeamMembersTemplatesResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	repeated ItemResultApiModel Result = 5;
@@ -325,7 +329,7 @@ message SearchTemplatesInput
 message SearchTemplatesResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	repeated ItemResultApiModel Result = 5;
@@ -344,7 +348,7 @@ message SearchEnvelopesInput
 message SearchEnvelopesResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	repeated ItemResultApiModel Result = 5;
@@ -354,7 +358,7 @@ message SearchEnvelopesResult
 message CreateOrganizationResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	string Result = 5;
@@ -393,9 +397,7 @@ message OrganizationUpdateSettingsApiModelInput
 {
 	AuthenticationApiModel Authentication = 3;
 	string Name = 4;
-	string DefaultEmailSubject=5;
-	string DefaultEmailBody=6;
-	string DefaultEmailTemplateLanguage=7;
+	string InvitationEmailLanguage=7;
 	EmailSenderTypeApi EmailSenderType=8;
 	OrganizationPoliciesApiModel Policies =9;
 	OrganizationVisualCustomizationApiModel VisualCustomization=10;
@@ -418,6 +420,8 @@ message OrganizationPoliciesApiModel
 	bool EnableTags=2;
 	bool DeleteTagText=3;
 	MetadataEditorRedirectApiModel MetadataEditorRedirect =4;
+	bool AllowLockedDocuments=5;
+	bool ForceBatchSign =6;
 }
 
 message  MetadataEditorRedirectApiModel
@@ -697,6 +701,12 @@ enum RecipientTypeApi
 }
 
 
+enum SignNotificationChannelTypeApi
+{
+	SignNotificationChannelTypeApi_Email = 0;
+	SignNotificationChannelTypeApi_SMS = 1;
+}
+
 message RecipientApiModel
 {
 	 string Identifier=1;
@@ -708,7 +718,6 @@ message RecipientApiModel
 	 RecipientTypeApi RecipientType=7;
 	 string AutomaticSignerProfileIdentifier=8;
 	 repeated RemoteSignatureConfigurationApiModel RemoteSignatureConfiguration=9;
-	 string Language=10;
 }
 
 
@@ -718,7 +727,8 @@ enum RecipientAuthenticationTypeApi
 	Password = 1;
 	SMS = 2;
 	AuthenticationProvider = 3;
-	ManualIdentityVerification=4;
+	BulksignIdentity =4;
+	ActiveDirectory =5;
 }
 
 
@@ -744,23 +754,23 @@ message UpdateDraftApiModelInput
 {
 	AuthenticationApiModel Authentication = 1;
 	string DraftId=2;
-	string EmailSubject=3;
-	string EmailMessage=4;
-	string Language=5;
-	string Metadata=6;
-	NullableInt32 DaysUntilExpire=7;
-	ReminderOptionsApiModel ReminderOptions=8;
-	string Name =9;
-	NullableBoolean DisableSignersShouldReceiveFinishedDocument=10;
-	CallbackApiModel OverwriteCallbackUrls=11;
-	SignSettingsApiModel OverwriteSignSettings=12;
-	DisclosureAgreementApiModel OverwriteDisclosureAgreement=13;
-	NullableBoolean AllowRecipientDelegation=14;
-	NullableBoolean CertifyDocumentsBeforeSending=15;
-	NullableBoolean PreventFormFieldEditOnEnvelopeCompletion=16;
-	NullableBoolean EnableBatchSign=17;
-	NullableBoolean DisableSignerEmailNotifications=18;
-	DocumentTimestampTypeApi DocumentTimestampType=19;
+	repeated MessageApiModel Messages =3;
+	string Language=4;
+	string Metadata=5;
+	NullableInt32 ExpirationDays=6;
+	ReminderOptionsApiModel ReminderOptions=7;
+	string Name =8;
+	NullableBoolean DisableSignersShouldReceiveFinishedDocument=9;
+	CallbackApiModel OverwriteCallbackUrls=10;
+	SignSettingsApiModel OverwriteSignSettings=11;
+	SignatureDisclosureApiModel OverwriteSignatureDisclosure=12;
+	NullableBoolean AllowRecipientDelegation=13;
+	NullableBoolean CertifyDocumentsBeforeSending=14;
+	NullableBoolean PreventFormFieldEditOnEnvelopeCompletion=15;
+	NullableBoolean EnableBatchSign=16;
+	NullableBoolean DisableRecipientNotifications=17;
+	DocumentTimestampTypeApi DocumentTimestampType=18;
+	string ExpirationDateAbsolute = 19;
 }
 
 
@@ -806,6 +816,7 @@ message SignSettingsApiModel
 	string DocumentDownloadRedirectUrl=8;
 	bool AllowRejectWithoutRejectionText=9;
 	bool AutoNavigationOnOpen=10;
+	bool ShowPhoneNumber = 11;
 }
 
 enum SignerDownloadDocumentActionTypeApi
@@ -816,16 +827,10 @@ enum SignerDownloadDocumentActionTypeApi
 	RedirectToUrl = 3;
 }
 
-message DisclosureAgreementApiModel
+message SignatureDisclosureApiModel
 {
-	repeated DisclosureAgreementTextApiModel DisclosureTexts=1;
-	bool ForceDisclosureAgreementDownload=2;
-}
-
-message DisclosureAgreementTextApiModel
-{
-	string LanguageCode=1;
-	string Text=2;
+	string SignatureDisclosure=1;
+	bool ForceSignatureDisclosureDownload=2;
 }
 
 enum DocumentTimestampTypeApi
@@ -851,24 +856,23 @@ message UpdateTemplateApiModelInput
 	AuthenticationApiModel Authentication = 1;
 	string TemplateId=2;
 	NullableBoolean IsSharedTemplate=3;
-
-	string EmailSubject=4;
-	string EmailMessage=5;
-	string Language=6;
-	string Metadata=7;
-	NullableInt32 DaysUntilExpire=8;
-	ReminderOptionsApiModel ReminderOptions=9;
-	string Name =10;
-	NullableBoolean DisableSignersShouldReceiveFinishedDocument=11;
-	CallbackApiModel OverwriteCallbackUrls=12;
-	SignSettingsApiModel OverwriteSignSettings=13;
-	DisclosureAgreementApiModel OverwriteDisclosureAgreement=14;
-	NullableBoolean AllowRecipientDelegation=15;
-	NullableBoolean CertifyDocumentsBeforeSending=16;
-	NullableBoolean PreventFormFieldEditOnEnvelopeCompletion=17;
-	NullableBoolean EnableBatchSign=18;
-	NullableBoolean DisableSignerEmailNotifications=19;
-	DocumentTimestampTypeApi DocumentTimestampType=20;
+	repeated MessageApiModel Messages =4;
+	string Language=5;
+	string Metadata=6;
+	NullableInt32 ExpirationDays=7;
+	ReminderOptionsApiModel ReminderOptions=8;
+	string Name =9;
+	NullableBoolean DisableSignersShouldReceiveFinishedDocument=10;
+	CallbackApiModel OverwriteCallbackUrls=11;
+	SignSettingsApiModel OverwriteSignSettings=12;
+	SignatureDisclosureApiModel OverwriteSignatureDisclosure=13;
+	NullableBoolean AllowRecipientDelegation=14;
+	NullableBoolean CertifyDocumentsBeforeSending=15;
+	NullableBoolean PreventFormFieldEditOnEnvelopeCompletion=16;
+	NullableBoolean EnableBatchSign=17;
+	NullableBoolean DisableRecipientNotifications=18;
+	DocumentTimestampTypeApi DocumentTimestampType=19;
+	string ExpirationDateAbsolute = 20;
 
 }
 
@@ -912,6 +916,7 @@ message ReplaceEnvelopeRecipientApiModelInput
 	string PersonalMessage=9;
 	repeated RecipientAuthenticationApiModel RecipientAuthenticationMethods=10;
 	string AutomaticSignerProfileIdentifier=11;
+	string Language = 12;
 }
 
 
@@ -966,7 +971,7 @@ enum FormFillSignatureTypeApi
 message GetCompletedFormFieldsResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	repeated RecipientFormFillApiModel Result=5;
@@ -995,7 +1000,7 @@ message ContactResultApiModel
 message GetSharedContactsResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	repeated ContactResultApiModel Result =5;
@@ -1005,7 +1010,7 @@ message GetSharedContactsResult
 message GetContactsResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	repeated ContactResultApiModel Result=5;
@@ -1026,7 +1031,7 @@ message LicenseResultApiModel
 message GetLicenseResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	LicenseResultApiModel Result=5;
@@ -1035,7 +1040,7 @@ message GetLicenseResult
 message GetUserInterfaceLanguagesResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	repeated string Result=5;
@@ -1044,7 +1049,7 @@ message GetUserInterfaceLanguagesResult
 message GetEmailLanguagesResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	repeated string Result=5;
@@ -1053,7 +1058,7 @@ message GetEmailLanguagesResult
 message GetTemplatesResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	repeated TemplateItemResultApiModel Result =5;
@@ -1092,7 +1097,7 @@ message TemplateDetailsResultApiModel
 	bool PreventFormFieldEditOnEnvelopeCompletion=13;
 	bool EnableBatchSign=14;
 	bool AllowRecipientDelegation=15;
-	bool DisableSignerEmailNotifications=16;
+	bool DisableRecipientNotifications=16;
 	bool DisableSignersShouldReceiveCompletedDocuments=17;
 	DocumentTimestampTypeApi DocumentTimestampType=18;
 }
@@ -1101,7 +1106,7 @@ message TemplateDetailsResultApiModel
 message GetTemplateDetailsResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	TemplateDetailsResultApiModel Result=5;
@@ -1131,27 +1136,26 @@ message TemplateApiModelInput
 {
 	AuthenticationApiModel Authentication = 1;
 	bool IsSharedTemplate=2;
-	string EmailSubject=3;
-	string EmailMessage=4;
-	string Language=5;
-	string Metadata=6;
-	NullableInt32 DaysUntilExpire=7;
-	repeated DocumentResultApiModel Documents=8;
-	repeated RecipientApiModel Recipients=9;
-	ReminderOptionsApiModel ReminderOptions=10;
-	string Name =11;
-	CallbackApiModel OverwriteCallbackUrls=12;
-	SignSettingsApiModel OverwriteSignSettings=13;
-	DisclosureAgreementApiModel OverwriteDisclosureAgreement=14;
-	NullableBoolean DisableSignersShouldReceiveFinishedDocument=15;
-	NullableBoolean AllowRecipientDelegation=16;
-	NullableBoolean CertifyDocumentsBeforeSending=17;
-	NullableBoolean PreventFormFieldEditOnEnvelopeCompletion=18;
-	NullableBoolean EnableBatchSign=19;
-	FileAccessModeTypeApi FileAccessMode=20;
-	repeated CustomFileAccessApiModel CustomFileAccess=21;
-	DocumentTimestampTypeApi DocumentTimestampType=22;
-	EnvelopeTypeApi EnvelopeType=23;
+	repeated MessageApiModel Messages =3;
+	string Language=4;
+	string Metadata=5;
+	NullableInt32 DaysUntilExpire=6;
+	repeated DocumentResultApiModel Documents=7;
+	repeated RecipientApiModel Recipients=8;
+	ReminderOptionsApiModel ReminderOptions=9;
+	string Name =10;
+	CallbackApiModel OverwriteCallbackUrls=11;
+	SignSettingsApiModel OverwriteSignSettings=12;
+	SignatureDisclosureApiModel OverwriteSignatureDisclosure=13;
+	NullableBoolean DisableSignersShouldReceiveFinishedDocument=14;
+	NullableBoolean AllowRecipientDelegation=15;
+	NullableBoolean CertifyDocumentsBeforeSending=16;
+	NullableBoolean PreventFormFieldEditOnEnvelopeCompletion=17;
+	NullableBoolean EnableBatchSign=18;
+	FileAccessModeTypeApi FileAccessMode=19;
+	repeated CustomFileAccessApiModel CustomFileAccess=20;
+	DocumentTimestampTypeApi DocumentTimestampType=21;
+	EnvelopeTypeApi EnvelopeType=22;
 }
 
 
@@ -1159,23 +1163,22 @@ message DraftApiModelInput
 {
 	AuthenticationApiModel Authentication = 1;
 	bool EnableEditIncognitoMode=2;
-	string EmailSubject=3;
-	string EmailMessage=4;
-	string Language=5;
-	string Metadata=6;
-	NullableInt32 DaysUntilExpire=7;
-	repeated DocumentResultApiModel Documents=8;
-	repeated RecipientApiModel Recipients=9;
-	ReminderOptionsApiModel ReminderOptions=10;
-	string Name =11;
-	CallbackApiModel OverwriteCallbackUrls=12;
-	SignSettingsApiModel OverwriteSignSettings=13;
-	DisclosureAgreementApiModel OverwriteDisclosureAgreement=14;
-	NullableBoolean DisableSignersShouldReceiveFinishedDocument=15;
-	NullableBoolean AllowRecipientDelegation=16;
-	NullableBoolean CertifyDocumentsBeforeSending=17;
-	NullableBoolean PreventFormFieldEditOnEnvelopeCompletion=18;
-	NullableBoolean EnableBatchSign=19;
+	repeated MessageApiModel Messages =3;
+	string Language=4;
+	string Metadata=5;
+	NullableInt32 DaysUntilExpire=6;
+	repeated DocumentResultApiModel Documents=7;
+	repeated RecipientApiModel Recipients=8;
+	ReminderOptionsApiModel ReminderOptions=9;
+	string Name =10;
+	CallbackApiModel OverwriteCallbackUrls=11;
+	SignSettingsApiModel OverwriteSignSettings=12;
+	SignatureDisclosureApiModel OverwriteSignatureDisclosure=13;
+	NullableBoolean DisableSignersShouldReceiveFinishedDocument=14;
+	NullableBoolean AllowRecipientDelegation=15;
+	NullableBoolean CertifyDocumentsBeforeSending=16;
+	NullableBoolean PreventFormFieldEditOnEnvelopeCompletion=17;
+	NullableBoolean EnableBatchSign=18;
 	FileAccessModeTypeApi FileAccessMode=20;
 	repeated CustomFileAccessApiModel CustomFileAccess=21;
 	DocumentTimestampTypeApi DocumentTimestampType=22;
@@ -1194,7 +1197,7 @@ message DraftItemResultApiModel
 message GetDraftsResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	repeated DraftItemResultApiModel Result=5;
@@ -1218,7 +1221,7 @@ message DraftDetailsResultApiModel
 	bool PreventFormFieldEditOnEnvelopeCompletion=13;
 	bool EnableBatchSign=14;
 	bool AllowRecipientDelegation=15;
-	bool DisableSignerEmailNotifications=16;
+	bool DisableRecipientNotifications=16;
 	bool DisableSignersShouldReceiveCompletedDocuments=17;
 	DocumentTimestampTypeApi DocumentTimestampType=18;
 	bool AllowEditIncognitoMode=19;
@@ -1227,7 +1230,7 @@ message DraftDetailsResultApiModel
 message GetDraftDetailsResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	DraftDetailsResultApiModel Result=5;
@@ -1261,7 +1264,7 @@ message FormFieldResultApiModel
 message AnalyzeFileResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	AnalyzedFileResultApiModel Result=5;
@@ -1285,7 +1288,7 @@ message PrepareEnvelopeApiModelInput
 message PrepareSendEnvelopeResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	EnvelopeApiModelInput Result=5;
@@ -1309,7 +1312,7 @@ message SendEnvelopeResultApiModel
 message SendEnvelopeFromDraftResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	SendEnvelopeResultApiModel Result=5;
@@ -1319,7 +1322,7 @@ message SendEnvelopeFromDraftResult
 message SendEnvelopeFromTemplateResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	SendEnvelopeResultApiModel Result=5;
@@ -1336,6 +1339,7 @@ message TemplateReplaceRecipientApiModel
 	string PhoneNumber=6;
 	string PersonalMessage=7;
 	repeated RecipientAuthenticationApiModel RecipientAuthenticationMethods=8;
+	string Language=9;
 }
 
 message TemplateReplaceFormFieldsApiModel
@@ -1359,35 +1363,35 @@ message EnvelopeFromTemplateApiModelInput
 message EnvelopeApiModelInput
 {
 	AuthenticationApiModel Authentication = 1;
-	bool DisableSignerEmailNotifications =2;
-	string EmailSubject=3;
-	string EmailMessage=4;
-	string Language=5;
-	string Metadata=6;
-	int32 DaysUntilExpire=7;
-	repeated DocumentApiModel Documents=8;
-	repeated RecipientApiModel Recipients=9;
-	ReminderOptionsApiModel ReminderOptions=10;
-	string Name =11;
-	NullableBoolean DisableSignersShouldReceiveFinishedDocument=12;
-	CallbackApiModel OverwriteCallbackUrls=13;
-	SignSettingsApiModel OverwriteSignSettings=14;
-	DisclosureAgreementApiModel OverwriteDisclosureAgreement=15;
-	bool AllowRecipientDelegation=16;
-	bool CertifyDocumentsBeforeSending=17;
-	bool PreventFormFieldEditOnEnvelopeCompletion=18;
-	bool EnableBatchSign=19;
-	FileAccessModeTypeApi FileAccessMode=20;
-	repeated CustomFileAccessApiModel CustomFileAccess=21;
-	DocumentTimestampTypeApi DocumentTimestampType=22;
-	EnvelopeTypeApi EnvelopeType=23;
+	bool DisableRecipientNotifications =2;
+	repeated MessageApiModel Messages =3;
+	string Language=4;
+	string Metadata=5;
+	int32 ExpirationDays=6;
+	repeated DocumentApiModel Documents=7;
+	repeated RecipientApiModel Recipients=8;
+	ReminderOptionsApiModel ReminderOptions=9;
+	string Name =10;
+	NullableBoolean DisableSignersShouldReceiveFinishedDocument=11;
+	CallbackApiModel OverwriteCallbackUrls=12;
+	SignSettingsApiModel OverwriteSignSettings=13;
+	SignatureDisclosureApiModel OverwriteSignatureDisclosure=14;
+	bool AllowRecipientDelegation=15;
+	bool CertifyDocumentsBeforeSending=16;
+	bool PreventFormFieldEditOnEnvelopeCompletion=17;
+	bool EnableBatchSign=18;
+	FileAccessModeTypeApi FileAccessMode=19;
+	repeated CustomFileAccessApiModel CustomFileAccess=20;
+	DocumentTimestampTypeApi DocumentTimestampType=21;
+	EnvelopeTypeApi EnvelopeType=22;
+	string ExpirationDateAbsolute =23;
 }
 
 
 message SendEnvelopeResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	SendEnvelopeResultApiModel Result =5;
@@ -1401,7 +1405,7 @@ message EnvelopeDetailsResultApiModel
 	string Name=2;
 	EnvelopeTypeApi EnvelopeType=3;
 	ReminderOptionsApiModel ReminderOptions=4;
-	repeated RecipientResultApiModel Recipients=5;
+	repeated EnvelopeRecipientResultApiModel Recipients=5;
 	repeated DocumentResultApiModel Documents=6;
 	EnvelopeStatusTypeApi Status =7;
 	string SentDateUTC =8;
@@ -1414,7 +1418,7 @@ message EnvelopeDetailsResultApiModel
 	bool PreventFormFieldEditOnEnvelopeCompletion=15;
 	bool EnableBatchSign=16;
 	bool AllowRecipientDelegation=17;
-	bool DisableSignerEmailNotifications=18;
+	bool DisableRecipientNotifications=18;
 	bool DisableSignersShouldReceiveCompletedDocuments=19;
 	DocumentTimestampTypeApi DocumentTimestampType=20;
 }
@@ -1423,7 +1427,7 @@ message EnvelopeDetailsResultApiModel
 message GetEnvelopeDetailsResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	EnvelopeDetailsResultApiModel Result=5;
@@ -1444,7 +1448,7 @@ enum EnvelopeStatusTypeApi
 message GetEnvelopeStatusResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	EnvelopeStatusTypeApi Result=5;
@@ -1467,6 +1471,29 @@ message CompletedAttachmentApiModel
 	string FileName	=2;
 }
 
+message EnvelopeRecipientResultApiModel
+{
+	string Identifier=1;
+	string Email=2;
+	string Name=3;
+	string Language =4;
+	int32 Index=5;
+	string PersonalMessage=6;
+	repeated RecipientAuthenticationApiModel RecipientAuthenticationMethods=7;
+	RecipientTypeApi RecipientType=8;
+	string AutomaticSignerProfileIdentifier=9;
+	SignNotificationChannelTypeApi SignNotificationChannel =10;
+	RecipientStatusTypeApi Status=11;
+	string SignGroup =12;
+	string AccessCode=13;
+	string SigningUrl=14;
+	bool HasBeenDelegated=15;
+	string RejectionMessage=16;
+	repeated CompletedAttachmentApiModel Attachments=17;
+	string LockedDate =18;
+	string FinishedDate = 19;
+}
+
 message RecipientResultApiModel
 {
 	string Identifier=1;
@@ -1476,22 +1503,17 @@ message RecipientResultApiModel
 	string PersonalMessage=5;
 	repeated RecipientAuthenticationApiModel RecipientAuthenticationMethods=6;
 	RecipientTypeApi RecipientType=7;
-	RecipientStatusTypeApi Status=8;
-	string AccessCode=9;
-	string SigningUrl=10;
-	bool HasBeenDelegated=11;
-	string RejectionMessage=12;
-	string AutomaticSignerProfileIdentifier=13;
-	repeated CompletedAttachmentApiModel Attachments=14;
-	string LockedDate =15;
-	string FinishedDate = 16;
+	string AutomaticSignerProfileIdentifier=8;
+	SignNotificationChannelTypeApi SignNotificationChannel = 9;
+	string SignGroup = 10;
+	string Language =11;
 }
 
 
 message GetEnvelopesByStatusResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	repeated ItemResultApiModel Result=5;
@@ -1501,7 +1523,7 @@ message GetEnvelopesByStatusResult
 message DownloadEnvelopeCompletedDocumentsResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	bytes Result=5;
@@ -1510,7 +1532,7 @@ message DownloadEnvelopeCompletedDocumentsResult
 message DownloadEnvelopeCompletedAttachmentsResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	bytes Result=5;
@@ -1520,7 +1542,7 @@ message DownloadEnvelopeCompletedAttachmentsResult
 message DownloadEnvelopeIncompleteDocumentsResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	bytes Result=5;
@@ -1539,7 +1561,7 @@ message EnvelopeToSignResultApiModel
 message GetEnvelopesToSignResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	repeated EnvelopeToSignResultApiModel Result =5;
@@ -1569,6 +1591,11 @@ message UserInvitationApiModelInput
 	string CustomRoleName=6;
 }
 
+enum AccountLoginTypeApi
+{
+	AccountLoginTypeApi_Password = 0;
+	AccountLoginTypeApi_OIDC_SAML=1;
+}
 
 message NewUserApiModelInput
 {
@@ -1590,6 +1617,7 @@ message NewUserApiModelInput
 	bool NotificationRecipientRejected=16;
 	bool NotificationRecipientOpenedSignStep=17;
 	bool NotificationRecipientSigned=18;
+	AccountLoginTypeApi AccountLoginType = 19;
 }
 
 enum AutomaticSigningProfileCertificateTypeApi
@@ -1637,7 +1665,7 @@ message AutomaticSigningProfileResultApiModel
 message GetUserAutomaticSigningProfilesResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	repeated AutomaticSigningProfileResultApiModel Result=5;
@@ -1647,7 +1675,7 @@ message GetUserAutomaticSigningProfilesResult
 message GetOrganizationAutomaticSigningProfilesResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	repeated AutomaticSigningProfileResultApiModel Result=5;
@@ -1656,7 +1684,7 @@ message GetOrganizationAutomaticSigningProfilesResult
 message GetSignatureImprintsResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	repeated string Result=5;
@@ -1699,7 +1727,7 @@ message OrganizationUserApiModel
 message GetOrganizationUsersResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	repeated OrganizationUserApiModel Result=5;
@@ -1709,7 +1737,7 @@ message GetOrganizationUsersResult
 message GetSignatureStampsResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	repeated string Result=5;
@@ -1729,7 +1757,7 @@ message NewStampApiModelInput
 message GetCustomUserRolesResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	repeated string Result=5;
@@ -1752,7 +1780,7 @@ message UserDetailsApiModel
 message GetUserDetailsResult
 {
 	string ErrorMessage = 1;
-	bool IsSuccessful = 2;
+	bool IsSuccess = 2;
 	int32 ErrorCode = 3;
 	string RequestId = 4;
 	UserDetailsApiModel Result=5;
@@ -1795,7 +1823,7 @@ message DateValidationApiModel
 message NumericRangeApiModel
 {
 	string From=1;
-    string To=2;
+	string To=2;
 }
 
 message NumberValidationApiModel
@@ -1834,4 +1862,114 @@ message ResetSignatureTypeApiModelInput
 	FindRecipientByEmailApiModel ByEmail=4;
 	FindRecipientByIdentifierApiModel ByIdentifier=5;
 	ResetSignatureType SignatureType=6;
+}
+
+message MessageApiModel
+{
+	string Subject=1;
+	string Message =2;
+	string Language=3;
+}
+
+
+message OrganizationSignGroupResultApiModel
+{
+	string Name = 1;
+	repeated SignGroupMemberResultApiModel  Members =2; 
+}
+
+message SignGroupMemberResultApiModel
+{
+	string Name = 1;
+	string Email=2;
+}
+
+
+message GetOrganizationSignGroupsResult
+{
+	string ErrorMessage = 1;
+	bool IsSuccess = 2;
+	int32 ErrorCode = 3;
+	string RequestId = 4;
+	repeated OrganizationSignGroupResultApiModel Result=5;
+}
+
+message RequestInformationApiModel
+{
+	string UserAgent =1;
+	string IP = 2;
+}
+
+enum AuditTrailType
+{
+	AuditTrailType_NONE=0;
+	SignPageLoaded = 1;
+	SignatureDisclosureApproved = 2;
+	SignatureDisclosureRejected = 3;
+	AuthenticationSucceeded = 4;
+	AuthenticationFailed = 5;
+	SignedManually = 6;
+	AuditTrailType_Finished = 7;
+	BatchSigned = 8;
+	GeoLocation = 10;
+	RedirectedWithAccessCode = 11;
+	FormFieldValueUpdate = 12;
+	NavigatedToSignatureField = 13;
+	FinishedWithRejection = 16;
+	SMSSentForAuthentication = 17;
+	AddFileAttachment = 18;
+	AuditTrailType_Custom = 19;
+	DeleteRecipient = 20;
+	ReadPageLoaded = 21;
+	ReadDocumentsConfirmation = 22;
+	Delegated = 23;
+	SenderConfirmedDelegation = 24;
+	IntroductionConfirmation = 25;
+	StartedSigningSession = 27;
+	DocumentImagesLoaded = 28;
+	RecipientReplaced = 29;
+	SMSSentForSignature = 30;
+	OTPSignatureAuthenticationSuccess = 31;
+	OTPSignatureAuthenticationFailed = 32;
+	SignedAutomatically = 33;
+	OTPBatchSignatureAuthenticationSuccess = 34;
+	OTPBatchSignatureAuthenticationFailed = 35;
+	ExpiredEnvelopeWasRestarted = 36;
+	SignatureDisclosurePdfDownload = 37;
+	AuditTrailType_ResetSignatureType = 38;
+	ReplacedBouncedEmail = 39;
+	DisposableAcceptedIssuerAgreement = 40;
+	DisposableSentOtp = 41;
+	EnvelopeSenderConfirmSignerIdentity = 45;
+	EnvelopeSenderRejectedSignerIdentity = 46;
+	IdentitySubmitted = 47;
+	NotificationSignEmail = 2000;
+	NotificationSignSMS = 2001;
+	NotificationEnvelopeCanceled = 2010;
+	NotificationEnvelopeExpired = 2011;
+	NotificationDeliveredReceiveCopy = 2012;
+	NotificationApproveEmail = 2013;
+	NotificationUnlockedManual = 2014;
+	NotificationUnlockedAutomatic = 2015;
+	NotificationIdentityAccepted = 2016;
+	NotificationIdentityRejected = 2017;
+}
+
+message AuditTrailEntryApiModel
+{
+	string Value = 1;
+	string EntryDateUTC = 2;
+	RequestInformationApiModel RequestInformation = 3;
+	AuditTrailType AuditTrailType = 4;
+	string RecipientIdentifier = 5;
+}
+
+
+message GetCompletedAuditTrailResult
+{
+	string ErrorMessage = 1;
+	bool IsSuccess = 2;
+	int32 ErrorCode = 3;
+	string RequestId = 4;
+	repeated AuditTrailEntryApiModel Result=5;
 }

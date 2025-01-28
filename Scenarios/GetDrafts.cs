@@ -1,4 +1,4 @@
-﻿using Bulksign.Api;
+﻿using BulksignGrpc;
 using GrpcApiSamples;
 
 namespace Bulksign.ApiSamples;
@@ -19,7 +19,7 @@ public class GetDrafts
 		{
 			GetDraftsResult result = ChannelManager.GetClient().GetDrafts(token);
 
-			if (result.IsSuccessful == false)
+			if (result.IsSuccess == false)
 			{
 				Console.WriteLine(result.Result.Count + " drafts found");
 			}

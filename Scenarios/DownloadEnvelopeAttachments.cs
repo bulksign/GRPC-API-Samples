@@ -1,4 +1,4 @@
-﻿using Bulksign.Api;
+﻿using BulksignGrpc;
 using GrpcApiSamples;
 
 namespace Bulksign.ApiSamples;
@@ -29,7 +29,7 @@ public class DownloadEnvelopeAttachments
 
 			DownloadEnvelopeCompletedAttachmentsResult  result = ChannelManager.GetClient().DownloadEnvelopeCompletedAttachments(ei);
 
-			if (result.IsSuccessful)
+			if (result.IsSuccess)
 			{
 				//the result here will by a byte[] of a zip file which contains ALL PDF attachments from all the envelope documents
 				Console.WriteLine($"File size :  {result.Result.Length}");

@@ -1,4 +1,4 @@
-﻿using Bulksign.Api;
+﻿using BulksignGrpc;
 using GrpcApiSamples;
 
 namespace Bulksign.ApiSamples;
@@ -25,7 +25,7 @@ public class GetEnvelopesByStatus
 		{
 			GetEnvelopesByStatusResult result = ChannelManager.GetClient().GetEnvelopesByStatus(gs);
 
-			if (result.IsSuccessful)
+			if (result.IsSuccess)
 			{
 				Console.WriteLine($"{result.Result.Count} envelopes found");
 			}

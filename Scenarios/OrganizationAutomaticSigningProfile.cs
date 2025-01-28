@@ -1,4 +1,5 @@
-﻿using Bulksign.Api;
+﻿
+using BulksignGrpc;
 using GrpcApiSamples;
 
 namespace Bulksign.ApiSamples;
@@ -20,7 +21,7 @@ public class OrganizationAutomaticSigningProfile
 		{
 			GetOrganizationAutomaticSigningProfilesResult result = ChannelManager.GetClient().GetOrganizationAutomaticSigningProfiles(token);
 
-			if (result.IsSuccessful)
+			if (result.IsSuccess)
 			{
 				Console.WriteLine($"Found {result.Result.Count} organization automatic signing profiles ");
 			}

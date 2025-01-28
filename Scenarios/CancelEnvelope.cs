@@ -1,5 +1,4 @@
-using System;
-using Bulksign.Api;
+using BulksignGrpc;
 using GrpcApiSamples;
 
 namespace Bulksign.ApiSamples;
@@ -30,7 +29,7 @@ public class CancelEnvelopes
 			//this works only for "InProgress" envelopes
 			EmptyResult result = ChannelManager.GetClient().CancelEnvelope(id);
 
-			if (result.IsSuccessful)
+			if (result.IsSuccess)
 			{
 				Console.WriteLine($"Envelope was canceled");
 			}

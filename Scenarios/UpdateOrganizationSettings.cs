@@ -1,4 +1,4 @@
-﻿using Bulksign.Api;
+﻿using BulksignGrpc;
 using GrpcApiSamples;
 
 namespace Bulksign.ApiSamples;
@@ -25,7 +25,7 @@ public class UpdateOrganizationSettings
 		{
 			EmptyResult result = ChannelManager.GetClient().UpdateOrganizationSettings(newSettings);
 
-			if (result.IsSuccessful)
+			if (result.IsSuccess)
 			{
 				Console.WriteLine("Organization settings were successfully updated");
 			}

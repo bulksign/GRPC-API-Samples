@@ -1,4 +1,5 @@
-using Bulksign.Api;
+
+using BulksignGrpc;
 using Google.Protobuf.Collections;
 using GrpcApiSamples;
 
@@ -18,10 +19,10 @@ public class AddNewSignatureToDocument
 		}
 
 		EnvelopeApiModelInput envelope = new EnvelopeApiModelInput();
-		envelope.Authentication = token;
-		envelope.EnvelopeType = EnvelopeTypeApi.Serial;
-		envelope.DaysUntilExpire = 10;
-		envelope.DisableSignerEmailNotifications = false;
+		envelope.Authentication                = token;
+		envelope.EnvelopeType                  = EnvelopeTypeApi.Serial;
+		envelope.ExpirationDays               = 10;
+		envelope.DisableRecipientNotifications = false;
 
 
 		envelope.Recipients.Add(new List<RecipientApiModel>()
@@ -73,7 +74,7 @@ public class AddNewSignatureToDocument
 		{
 			SendEnvelopeResult result = ChannelManager.GetClient().SendEnvelope(envelope);
 
-			if (result.IsSuccessful)
+			if (result.IsSuccess)
 			{
 				Console.WriteLine("Access code for recipient " + result.Result.RecipientAccess[0].RecipientEmail + " is " + result.Result.RecipientAccess[0].AccessCode);
 				Console.WriteLine("EnvelopeId is : " + result.Result.EnvelopeId);

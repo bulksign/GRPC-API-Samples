@@ -1,4 +1,4 @@
-﻿using Bulksign.Api;
+﻿using BulksignGrpc;
 using GrpcApiSamples;
 
 namespace Bulksign.ApiSamples;
@@ -25,7 +25,7 @@ public class SearchTeamMembersEnvelopes
 		{
 			SearchTeamMembersEnvelopesResult result = ChannelManager.GetClient().SearchTeamMembersEnvelopes(search);
 
-			if (result.IsSuccessful)
+			if (result.IsSuccess)
 			{
 				Console.WriteLine($"Found {result.Result.Count} team member envelopes");
 			}

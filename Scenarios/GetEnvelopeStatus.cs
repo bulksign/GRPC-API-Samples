@@ -1,4 +1,4 @@
-﻿using Bulksign.Api;
+﻿using BulksignGrpc;
 using GrpcApiSamples;
 
 namespace Bulksign.ApiSamples;
@@ -25,7 +25,7 @@ public class GetEnvelopeStatus
 		{
 			GetEnvelopeStatusResult result = ChannelManager.GetClient().GetEnvelopeStatus(eid);
 
-			if (result.IsSuccessful)
+			if (result.IsSuccess)
 			{
 				Console.WriteLine($"Envelope status is {result.Result.ToString()}");
 			}
